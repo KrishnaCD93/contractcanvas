@@ -13,38 +13,37 @@ export const Navbar = () => {
 
   async function fetchUserName(userId: string) {
     const { data, error } = await supabase
-      .from('users') // Replace 'users' with the name of your users table
-      .select('name') // Replace 'name' with the name of the column containing the user's name
+      .from('users')
+      .select('name')
       .eq('id', userId)
       .single();
-  
+
     if (error) {
       console.error('Error fetching user name:', error.message);
     } else {
       setUserName(data.name);
     }
   }
+
   
   const logout = async () => {
     await supabase.auth.signOut();
-    // Redirect user to the login page or home page after successful logout
     router.push('/login');
   };
-
+  
   const user = session?.user;
-
+  
   useEffect(() => {
-    setClientSession(session);
+    console.log('user', userName)
     if (session?.user) {
       fetchUserName(session.user.id);
     }
-  }, [session]);
-  
+  }, [session, userName]);
 
   return (
     <Box bg="teal.500" px={4} py={2}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-        <Heading as="h1" size="md" color="white" letterSpacing={'tighter'}>
+        <Heading as="h1" size="md" cursor="pointer" onClick={() => router.push('/')}>
           ContractCanvas
         </Heading>
         <HStack spacing={8} alignItems={'center'}>
@@ -80,7 +79,3 @@ export const Navbar = () => {
     </Box>
   );
 };
-
-function setClientSession(session: import("@supabase/auth-helpers-react").Session | null) {
-  throw new Error('Function not implemented.');
-}

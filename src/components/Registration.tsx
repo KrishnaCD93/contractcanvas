@@ -1,4 +1,3 @@
-// components/Registration../supabase
 import { useState } from 'react';
 import {
   Box,
@@ -36,32 +35,21 @@ export const Registration = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const { data: user, error } = await supabase.auth.signUp({
+  
+    const { data, error } = await supabase.auth.signUp({
       email: registrationData.email,
       password: registrationData.password,
-    });
-
-    if (user) {
-      const { data, error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: user.user?.id,
-            name: registrationData.name,
-            email: registrationData.email,
-            user_type: registrationData.userType,
-            created_at: new Date(),
-          },
-        ]);
-
-      if (insertError) {
-        console.error('Error during user data insertion:', insertError.message);
-      } else {
-        // Redirect user to the home page or a welcome page after successful registration
-        console.log('User data inserted successfully:', data);
-        router.push('/');
+      options: {
+        // Include the user_type and name in the user metadata
+        data: {
+          user_type: registrationData.userType,
+          full_name: registrationData.name,
+        }
       }
+    });
+  
+    if (data) {
+      router.push('/');
     } else {
       console.error('Error during registration:', error?.message);
     }

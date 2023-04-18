@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, VStack } from '@chakra-ui/react';
 import { supabase } from '../supabase';
+import { useToast } from '@chakra-ui/react';
 
 interface ProfileState {
   id: string;
@@ -17,6 +18,8 @@ export const Profile = () => {
     email: '',
     userType: '',
   });
+  
+  const toast = useToast();
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -60,6 +63,14 @@ export const Profile = () => {
     console.error('Error updating user data:', error.message);
   } else {
     // Display a success message or perform any necessary actions after a successful update
+    console.log('User data updated successfully');
+    toast({
+      title: "Profile updated.",
+      description: "Your profile has been updated.",
+      status: "success",
+      duration: 9000,
+      isClosable: true,
+    })
   }
 };
 
