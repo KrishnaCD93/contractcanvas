@@ -2,7 +2,7 @@
 import { Box, Flex, Heading, HStack, Link } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useSession } from '@supabase/auth-helpers-react';
-import { supabase } from '../supabase';
+import { supabase } from '@/supabase';
 import { useEffect, useState } from 'react';
 
 export const Navbar = () => {
@@ -13,15 +13,15 @@ export const Navbar = () => {
 
   async function fetchUserName(userId: string) {
     const { data, error } = await supabase
-      .from('users')
-      .select('name')
+      .from('profiles')
+      .select('full_name')
       .eq('id', userId)
       .single();
 
     if (error) {
       console.error('Error fetching user name:', error.message);
     } else {
-      setUserName(data.name);
+      setUserName(data.full_name);
     }
   }
 
@@ -35,6 +35,7 @@ export const Navbar = () => {
   
   useEffect(() => {
     console.log('user', userName)
+    console.log('session', session)
     if (session?.user) {
       fetchUserName(session.user.id);
     }
