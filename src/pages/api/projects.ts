@@ -1,7 +1,6 @@
 // pages/api/projects.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/supabase';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;
@@ -26,6 +25,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createServerSupabaseClient({
+    req,
+    res,
+  });
   const { data, error } = await supabase.from('projects').select('*');
 
   if (error) {
@@ -36,6 +39,8 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePost(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createServerSupabaseClient({ req, res });
+
   const { title, description, user_id } = req.body;
 
   if (!title || !description || !user_id) {
@@ -55,6 +60,8 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePut(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createServerSupabaseClient({ req, res });
+
   const { id, title, description } = req.body;
 
   if (!id || (!title && !description)) {
@@ -75,6 +82,8 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handleDelete(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createServerSupabaseClient({ req, res });
+
   const { id } = req.query;
 
   if (!id) {

@@ -1,50 +1,69 @@
 // components/Navbar.tsx
-import { Box, Flex, Heading, HStack, Link } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Heading,
+  HStack,
+  Link,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Avatar,
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { useSession } from '@supabase/auth-helpers-react';
-import { supabase } from '@/supabase';
-import { useEffect, useState } from 'react';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'; // Import useSupabaseClient
+import { Database } from '@/../types_db'; // Adjust the import path accordingly
+import { useCallback, useEffect, useState } from 'react';
+import { FiChevronDown } from 'react-icons/fi';
 
 export const Navbar = () => {
   const [userName, setUserName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  const session = useSession();
+  const user = useUser();
   const router = useRouter();
 
-  async function fetchUserName(userId: string) {
-    const { data, error } = await supabase
+  // Use the useSupabaseClient hook to access the Supabase client
+  const supabaseClient = useSupabaseClient<Database>();
+
+  const fetchData = useCallback( async function fetchUserData(userId: string) {
+    const { data, error } = await supabaseClient
       .from('profiles')
-      .select('full_name')
+      .select('full_name, avatar_url')
       .eq('id', userId)
       .single();
 
     if (error) {
-      console.error('Error fetching user name:', error.message);
+      console.error('Error fetching user data:', error.message);
     } else {
       setUserName(data.full_name);
+      setAvatarUrl(data.avatar_url);
     }
-  }
+  }, [supabaseClient]);
 
-  
   const logout = async () => {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     router.push('/login');
   };
-  
-  const user = session?.user;
-  
+
   useEffect(() => {
-    console.log('user', userName)
-    console.log('session', session)
-    if (session?.user) {
-      fetchUserName(session.user.id);
+    if (user) {
+      console.log('user', user);
+      fetchData(user.id);
     }
-  }, [session, userName]);
+  }, [user, fetchData]);
 
   return (
     <Box bg="teal.500" px={4} py={2}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-        <Heading as="h1" size="md" cursor="pointer" onClick={() => router.push('/')}>
+        <Heading
+          as="h1"
+          size="md"
+          cursor="pointer"
+          onClick={() => router.push('/')}
+        >
           ContractCanvas
         </Heading>
         <HStack spacing={8} alignItems={'center'}>
@@ -57,12 +76,29 @@ export const Navbar = () => {
             </Link>
             {user ? (
               <>
-                <Link href="/profile" color="white">
-                  {userName || user.email}
-                </Link>
-                <Link onClick={logout} color="white">
-                  Logout
-                </Link>
+                <Menu>
+                  <MenuButton
+                    as={IconButton}
+                    icon={<FiChevronDown />}
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="whiteAlpha"
+                  >
+                    <Avatar
+                      size="sm"
+                      src={
+                        avatarUrl ||
+                        'https://via.placeholder.com/150'
+                      }
+                    />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem onClick={() => router.push('/profile')}>
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={logout}>Logout</MenuItem>
+                  </MenuList>
+                </Menu>
               </>
             ) : (
               <>

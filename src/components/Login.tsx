@@ -1,7 +1,9 @@
 // components/Login.tsx
 import { useState } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, VStack } from '@chakra-ui/react';
-import { supabase } from '../supabase';
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { Database } from '@/../types_db'
+
 import router from 'next/router';
 
 interface LoginState {
@@ -10,6 +12,7 @@ interface LoginState {
 }
 
 export const Login = () => {
+  const supabaseClient = createBrowserSupabaseClient<Database>()
   const [loginData, setLoginData] = useState<LoginState>({
     email: '',
     password: '',
@@ -18,7 +21,7 @@ export const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { data: user, error } = await supabase.auth.signInWithPassword({
+    const { data: user, error } = await supabaseClient.auth.signInWithPassword({
       email: loginData.email,
       password: loginData.password,
     });
@@ -27,7 +30,7 @@ export const Login = () => {
       console.error('Error during login:', error.message);
     } else {
       // Redirect user to the home page or dashboard after successful login
-      router.push('/');
+      router.push('/dashboard');
     }
   };
 

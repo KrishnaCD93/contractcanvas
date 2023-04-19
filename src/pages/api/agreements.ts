@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/supabase';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const userId = req.headers.userid as string;

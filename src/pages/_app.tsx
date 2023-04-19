@@ -1,3 +1,4 @@
+// pages/_app.tsx
 import * as React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { useState } from 'react'
@@ -6,17 +7,12 @@ import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
 import { AppProps } from 'next/app'
 import { Navbar } from '@/components/Navbar';
 
-function MyApp({
-  Component,
-  pageProps,
-}: AppProps<{
-  initialSession: Session,
-}>) {
-  const [supabase] = useState(() => createBrowserSupabaseClient())
+function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient())
 
   return (
     <ChakraProvider>
-      <SessionContextProvider supabaseClient={supabase} initialSession={pageProps.initialSession}>
+      <SessionContextProvider supabaseClient={supabaseClient} initialSession={pageProps.initialSession}>
         <Navbar />
         <Component {...pageProps} />
       </SessionContextProvider>

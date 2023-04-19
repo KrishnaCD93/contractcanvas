@@ -10,7 +10,8 @@ import {
   Stack,
   Radio,
 } from "@chakra-ui/react";
-import { supabase } from '../supabase';
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { Database } from '@/../types_db'
 import router from 'next/router';
 
 interface RegistrationState {
@@ -21,6 +22,7 @@ interface RegistrationState {
 }
 
 export const Registration = () => {
+  const supabaseClient = createBrowserSupabaseClient<Database>()
   const [registrationData, setRegistrationData] = useState<RegistrationState>({
     name: '',
     email: '',
@@ -36,7 +38,7 @@ export const Registration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
       email: registrationData.email,
       password: registrationData.password,
       options: {
