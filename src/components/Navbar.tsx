@@ -29,6 +29,7 @@ export const Navbar = () => {
   const supabaseClient = useSupabaseClient<Database>();
 
   const fetchData = useCallback( async function fetchUserData(userId: string) {
+    setUserName(user?.user_metadata.full_name || null);
     const { data, error } = await supabaseClient
       .from('profiles')
       .select('full_name, avatar_url')
@@ -41,7 +42,7 @@ export const Navbar = () => {
       setUserName(data.full_name);
       setAvatarUrl(data.avatar_url);
     }
-  }, [supabaseClient]);
+  }, [supabaseClient, user]);
 
   const logout = async () => {
     await supabaseClient.auth.signOut();
@@ -84,13 +85,10 @@ export const Navbar = () => {
                     variant="ghost"
                     colorScheme="whiteAlpha"
                   >
-                    <Avatar
+                    {avatarUrl && <Avatar
                       size="sm"
-                      src={
-                        avatarUrl ||
-                        'https://via.placeholder.com/150'
-                      }
-                    />
+                      src={avatarUrl}
+                    /> || userName}
                   </MenuButton>
                   <MenuList>
                     <MenuItem onClick={() => router.push('/profile')}>
