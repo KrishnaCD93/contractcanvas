@@ -11,94 +11,165 @@ import {
   CheckboxGroup,
   Checkbox,
   Heading,
+  useToast,
+  Text,
 } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/router';
 
-interface ClientProjectFormData {
-  scope: string;
-  milestones: string;
-  milestoneDates: string;
-  cost: number;
-  termsAndConditions: string;
-  specificRequests: string;
-  projectIP: boolean;
+interface ClientRegistrationProps {
+  formData: any;
+  setFormData: any;
+  forwardRef: React.RefObject<HTMLDivElement>;
 }
 
-const steps = [
-  'Scope',
-  'Milestones',
-  'Milestone Dates',
-  'Cost',
-  'Terms and Conditions',
-  'Specific Requests',
-  'Project IP',
-];
+const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, setFormData, forwardRef }) => {
+  const toast = useToast();
+  const router = useRouter();
+  const [step, setStep] = useState(0);
 
-export const ClientProjectForm: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ClientProjectFormData>();
-
-  const onSubmit = (data: ClientProjectFormData) => {
-    console.log(data);
+  const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const nextStep = () => setCurrentStep((prevStep) => prevStep + 1);
-  const prevStep = () => setCurrentStep((prevStep) => prevStep - 1);
+  const uploadClient = async (database: string, values: any[]) => {
+    const response = await fetch('/api/supabase-post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ database, values }),
+    });
+  
+    const { result } = await response.json();
+    console.log('Uploaded portfolio items:', result);
+    return result;
+  };
 
-  const renderStep = (step: number) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+
+    const clientData = {
+      scope: formData.scope,
+      milestones: formData.milestones,
+      milestoneDates: formData.milestoneDates,
+      cost: formData.cost,
+      termsAndConditions: formData.termsAndConditions,
+      specificRequests: formData.specificRequests,
+      projectIP: formData.projectIP,
+    };
+
+    const client = await uploadClient('client_projects', [clientData]);
+  
+    if (!client) {
+      toast({
+        title: 'Client registration failed.',
+        description: 'There was an error submitting your registration.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    toast({
+      title: 'Client registration complete.',
+      description: 'Your registration has been submitted.',
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    });
+
+    router.push('/dashboard');
+  };
+
+  const nextStep = () => setStep(step + 1);
+  const prevStep = () => setStep(step - 1);
+
+  const renderStepContent = () => {
     switch (step) {
       case 0:
         return (
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel>Scope</FormLabel>
-            <Textarea {...register('scope', { required: true })} />
+            <Textarea
+              name="scope"
+              value={formData.scope}
+              onChange={handleFormChange}
+              required
+            />
           </FormControl>
         );
       case 1:
         return (
-          <FormControl>
+          <>
+          <FormControl isRequired>
             <FormLabel>Milestones</FormLabel>
-            <Textarea {...register('milestones', { required: true })} />
+            <Textarea
+              name="milestones"
+              value={formData.milestones}
+              onChange={handleFormChange}
+              required
+            />
           </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Milestone Dates</FormLabel>
+            <Input
+              type="text"
+              name="milestoneDates"
+              value={formData.milestoneDates}
+              onChange={handleFormChange}
+              required
+            />
+          </FormControl>
+          </>
         );
       case 2:
         return (
-          <FormControl>
-            <FormLabel>Milestone Dates</FormLabel>
-            <Input {...register('milestoneDates', { required: true })} />
+          <FormControl isRequired>
+            <FormLabel>Cost</FormLabel>
+            <Input
+              type="number"
+              name="cost"
+              value={formData.cost}
+              onChange={handleFormChange}
+              required
+            />
           </FormControl>
         );
       case 3:
         return (
-          <FormControl>
-            <FormLabel>Cost</FormLabel>
-            <Input {...register('cost', { required: true, min: 0 })} type="number" />
+          <FormControl isRequired>
+            <FormLabel>Terms and Conditions</FormLabel>
+            <Textarea
+              name="termsAndConditions"
+              value={formData.termsAndConditions}
+              onChange={handleFormChange}
+              required
+            />
           </FormControl>
         );
       case 4:
         return (
-          <FormControl>
-            <FormLabel>Terms and Conditions</FormLabel>
-            <Textarea {...register('termsAndConditions', { required: true })} />
+          <FormControl isRequired>
+            <FormLabel>Specific Requests</FormLabel>
+            <Textarea
+              name="specificRequests"
+              value={formData.specificRequests}
+              onChange={handleFormChange}
+              required
+            />
           </FormControl>
         );
       case 5:
         return (
           <FormControl>
-            <FormLabel>Specific Requests</FormLabel>
-            <Textarea {...register('specificRequests', { required: true })} />
-          </FormControl>
-        );
-      case 6:
-        return (
-          <FormControl>
-            <FormLabel>Project IP</FormLabel>
+            <FormLabel>Protect IP</FormLabel>
             <CheckboxGroup>
-              <Checkbox {...register('projectIP')} value="true">
+              <Checkbox
+                name="projectIP"
+                isChecked={formData.protectIP}
+                onChange={handleFormChange}
+              >
                 Protected IP
               </Checkbox>
             </CheckboxGroup>
@@ -110,27 +181,26 @@ export const ClientProjectForm: React.FC = () => {
   };
 
   return (
-    <Box>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <Box boxShadow="lg" p={8} borderRadius="md" borderWidth={1} ref={forwardRef}>
+      <Heading as="h2" size="lg" textAlign="center" mb={6}>
+        Client Registration
+      </Heading>
+      <Text fontSize="md" textAlign="center" mb={6}>
+        Sign up your projects here and we will find the best developers for your job. Remeber to mark your IP as protected if you want to keep it private.
+      </Text>
+      <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
-          {renderStep(currentStep)}
-          {currentStep > 0 && (
-            <Button onClick={prevStep} variant="outline">
-              Previous
-            </Button>)}
-          {currentStep < steps.length - 1 ? (
-          <Button onClick={nextStep}>Next</Button>
+          {renderStepContent()}
+          {step > 0 && <Button onClick={prevStep}>Previous</Button>}
+          {step < 6 ? (
+            <Button onClick={nextStep}>Next</Button>
           ) : (
             <Button type="submit">Submit</Button>
           )}
         </VStack>
       </form>
-      <Box>
-        <Heading as="h3" size="md">Submitted Data:</Heading>
-        <pre>{JSON.stringify({ steps }, null, 2)}</pre>
-      </Box>
     </Box>
   );
 };
 
-export default ClientProjectForm;
+export default ClientRegistrationForm;

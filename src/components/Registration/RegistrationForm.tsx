@@ -51,7 +51,7 @@ export const Registration: React.FC<RegistrationProps> = ({
         ContractCanvas Registration
       </Heading>
       <Text fontSize="md" textAlign="center" mb={6}>
-        Please fill the below form. Items marked with a checkmark for protected IP will not be shared with other users unless authorized by you.
+        Please fill the below form to register. Items checked for protected IP will not be shared with other users unless authorized by you.
       </Text>
       <form onSubmit={handleSubmit}>
         <VStack spacing={4} boxShadow="lg" p={8} borderRadius="md" borderWidth={1}>
@@ -124,18 +124,6 @@ export const Registration: React.FC<RegistrationProps> = ({
             {editingIndex !== null ? 'Update' : 'Add'} portfolio item
           </Button>
           </Box>
-          <FormControl as="fieldset">
-            <FormLabel as="legend">Role</FormLabel>
-            <RadioGroup
-              onChange={(value) => handleRoleChange(value)}
-            >
-              <Stack direction="row">
-                <Radio value="client">Client</Radio>
-                <Radio value="developer">Developer</Radio>
-              </Stack>
-              <FormHelperText>How would you like to use ContractCanvas?</FormHelperText>
-            </RadioGroup>
-          </FormControl>
           <Box>
           <Heading as="h4" size="sm" mb={2}>Added Portfolio Items:</Heading>
             {portfolioItems.map((item, index) => (
@@ -153,6 +141,20 @@ export const Registration: React.FC<RegistrationProps> = ({
               </Box>
             ))}
           </Box>
+          <FormControl as="fieldset">
+            <FormLabel as="legend">Role</FormLabel>
+            <RadioGroup
+              onChange={(value) => handleRoleChange(value)}
+              defaultValue='none'
+            >
+              <Stack direction="row">
+                <Radio value="client">Client</Radio>
+                <Radio value="developer">Developer</Radio>
+                <Radio value="none">None</Radio>
+              </Stack>
+              <FormHelperText>How would you like to use ContractCanvas?</FormHelperText>
+            </RadioGroup>
+          </FormControl>
           <Button type="submit">Register</Button>
         </VStack>
       </form>
