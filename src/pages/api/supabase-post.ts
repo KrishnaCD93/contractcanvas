@@ -10,6 +10,7 @@ type Data = {
 
 export default async function handleChange(req: NextApiRequest, res: NextApiResponse<Data>) {
   const supabase = createServerSupabaseClient<Database>({ req, res });
+  console.log('req', req.body)
   const database = req.body.database;
   const values = req.body.values;
 
@@ -20,7 +21,7 @@ export default async function handleChange(req: NextApiRequest, res: NextApiResp
 }
 
 async function processValue(database: string, values: any[], supabase: any): Promise<string> {
-  const { data, error } = await supabase.from(database).insert([{ values }]);
+  const { data, error } = await supabase.from(database).insert(values);
 
   if (error) {
     console.error('Error while uploading value:', error);

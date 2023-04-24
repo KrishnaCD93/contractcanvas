@@ -1,5 +1,5 @@
 // /components/Registration/RegistrationForm.tsx
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   Box,
   Button,
@@ -18,6 +18,7 @@ import {
 import { RegistrationState } from '@/pages/register';
 
 interface RegistrationProps {
+  renderForm: () => ReactNode;
   registrationData: RegistrationState;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRoleChange: (value: string) => void;
@@ -32,6 +33,7 @@ interface RegistrationProps {
 }
 
 export const Registration: React.FC<RegistrationProps> = ({
+  renderForm,
   registrationData,
   handleChange,
   handleRoleChange,
@@ -53,8 +55,23 @@ export const Registration: React.FC<RegistrationProps> = ({
       <Text fontSize="md" textAlign="center" mb={6}>
         Please fill the below form to register. Items checked for protected IP will not be shared with other users unless authorized by you.
       </Text>
-      <form onSubmit={handleSubmit}>
         <VStack spacing={4} boxShadow="lg" p={8} borderRadius="md" borderWidth={1}>
+          <FormControl as="fieldset">
+            <FormLabel as="legend">Role</FormLabel>
+            <RadioGroup
+              onChange={(value) => handleRoleChange(value)}
+              defaultValue='none'
+            >
+              <Stack direction="row">
+                <Radio value="client">Client</Radio>
+                <Radio value="developer">Developer</Radio>
+                <Radio value="none">None</Radio>
+              </Stack>
+              <FormHelperText>How would you like to use ContractCanvas?</FormHelperText>
+            </RadioGroup>
+          </FormControl>
+          {renderForm()}
+          <form onSubmit={handleSubmit}>
           <FormControl isRequired>
             <FormLabel>Name</FormLabel>
             <Input
@@ -90,6 +107,9 @@ export const Registration: React.FC<RegistrationProps> = ({
           </FormControl>
           <FormControl>
             <Heading as="h3" size="md">Portfolio</Heading>
+            <Text fontSize="md" mb={2}>
+              Add portfolio items to showcase your work. You can add as many items as you like. Clients and developers will be able to see your portfolio items to help them decide if they want to work with you.
+            </Text>
             <FormLabel>Title</FormLabel>
             <Input
               type="text"
@@ -141,26 +161,11 @@ export const Registration: React.FC<RegistrationProps> = ({
               </Box>
             ))}
           </Box>
-          <FormControl as="fieldset">
-            <FormLabel as="legend">Role</FormLabel>
-            <RadioGroup
-              onChange={(value) => handleRoleChange(value)}
-              defaultValue='none'
-            >
-              <Stack direction="row">
-                <Radio value="client">Client</Radio>
-                <Radio value="developer">Developer</Radio>
-                <Radio value="none">None</Radio>
-              </Stack>
-              <FormHelperText>How would you like to use ContractCanvas?</FormHelperText>
-            </RadioGroup>
-          </FormControl>
           <Button type="submit">Register</Button>
-        </VStack>
-      </form>
+        </form>
+      </VStack>
     </Box>
   );
 };
 
 export default Registration;
-

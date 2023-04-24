@@ -12,18 +12,19 @@ import {
   Text,
   FormHelperText,
   useToast,
+  Tooltip,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+import { InfoOutlineIcon } from '@chakra-ui/icons';
 
 interface DeveloperRegistrationProps {
   formData: any;
   setFormData: any;
   forwardRef: React.RefObject<HTMLDivElement>;
+  setDeveloperId: any;
 }
 
-const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formData, setFormData, forwardRef }) => {
+const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formData, setFormData, forwardRef, setDeveloperId }) => {
   const toast = useToast();
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [resumeUrl, setResumeUrl] = useState('');
 
@@ -68,28 +69,31 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
     });
   
     const { result } = await response.json();
-    console.log('Uploaded portfolio items:', result);
+    console.log('Uploaded dev data:', result);
     return result;
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    console.log('developer form data:', formData);
+  
+    let uploadedResumeUrl = '';
     if (formData.resume) {
-      setResumeUrl(await uploadResume());
+      uploadedResumeUrl = await uploadResume();
+      setResumeUrl(uploadedResumeUrl);
     }
-      
+  
     const developerData = {
       rate: formData.rate,
-      resume: resumeUrl || '',
+      resume_url: uploadedResumeUrl || '',
       availability: formData.availability,
       skills: formData.skills,
       exclusions: formData.exclusions,
     };
-
+  
     const dev = await uploadDev('developers', [developerData]);
   
-    if (!dev) {
+    if (dev === null) {
       toast({
         title: 'Developer registration failed.',
         description: 'There was an error submitting your registration.',
@@ -99,16 +103,16 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       });
       return;
     }
+  
+    setDeveloperId(dev[0].id);
     toast({
       title: 'Developer registration complete.',
-      description: 'Your registration has been submitted.',
+      description: 'Your developer profile is complete. Please continue to register your email and portfolio.',
       status: 'success',
       duration: 5000,
       isClosable: true,
     });
-
-    router.push('/dashboard');
-  };
+  };  
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -118,7 +122,12 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       case 0:
         return (
           <FormControl isRequired>
-            <FormLabel>Rate</FormLabel>
+            <FormLabel>
+              Rate{' '}
+              <Tooltip label="Your hourly rate is important for matching you with projects that fit your desired compensation.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Input
               type="text"
               name="rate"
@@ -132,7 +141,12 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       case 1:
         return (
           <FormControl>
-            <FormLabel>Resume</FormLabel>
+            <FormLabel>
+              Resume{' '}
+              <Tooltip label="Upload your resume to showcase your experience and skills to potential clients.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Input type="file" name="resume" onChange={handleFileChange} />
             <FormHelperText>Upload your resume in PDF format.</FormHelperText>
           </FormControl>
@@ -140,7 +154,12 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       case 2:
         return (
           <FormControl isRequired>
-            <FormLabel>Availability</FormLabel>
+            <FormLabel>
+              Availability{' '}
+              <Tooltip label="Your availability helps clients understand when you can work on their projects.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Input
               type="text"
               name="availability"
@@ -154,10 +173,15 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       case 3:
         return (
           <FormControl isRequired>
-            <FormLabel>Skills</FormLabel>
+            <FormLabel>
+              Skills{' '}
+              <Tooltip label="Listing your skills helps clients find developers with the expertise they need for their projects.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Textarea
               name="skills"
-              value={formData.skills.join(', ')}
+              defaultValue={formData.skills.join(', ')}
               onChange={handleFormChange}
               required
             />
@@ -167,7 +191,12 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       case 4:
         return (
           <FormControl>
-            <FormLabel>Exclusions</FormLabel>
+            <FormLabel>
+              Exclusions{' '}
+              <Tooltip label="Specify any project types or industries you prefer not to work in, so you are not matched with unsuitable projects.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Textarea
               name="exclusions"
               value={formData.exclusions}
@@ -179,7 +208,8 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       default:
         return null;
     }
-  };  
+  };
+  
 
   return (
     <Box boxShadow="lg" p={8} borderRadius="md" borderWidth={1} ref={forwardRef}>
@@ -192,9 +222,9 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           {renderStepContent()}
-          {step > 0 && <Button onClick={prevStep}>Previous</Button>}
-          {step < 5 ? (
-            <Button onClick={nextStep}>Next</Button>
+          {step > 0 && <Button variant='ghost' onClick={prevStep}>Previous</Button>}
+          {step < 4 ? (
+            <Button variant='ghost' onClick={nextStep}>Next</Button>
           ) : (
             <Button type="submit">Submit</Button>
           )}

@@ -6,6 +6,7 @@ import DeveloperRegistrationForm from '../components/Registration/DeveloperRegis
 import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useDisclosure, useToast } from '@chakra-ui/react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Database } from '../../types_db';
+import { useRouter } from 'next/router';
 
 export interface RegistrationState {
   name: string;
@@ -17,6 +18,7 @@ export interface RegistrationState {
 
 const RegisterPage: React.FC = () => {
   const toast = useToast();
+  const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>()
   
   const [registrationData, setRegistrationData] = useState<RegistrationState>({
@@ -42,21 +44,19 @@ const RegisterPage: React.FC = () => {
   });
 
   const [clientFormData, setClientFormData] = useState<{
-    scope: string;
-    milestones: string;
-    milestoneDates: string;
-    cost: string;
-    terms: string;
-    requests: string;
-    protectIP: string;
+    scope: '',
+    milestones: [], 
+    cost: '',
+    termsAndConditions: '',
+    specificRequests: '',
+    protectedIP: false,
   }>({
     scope: '',
-    milestones: '',
-    milestoneDates: '',
+    milestones: [],
     cost: '',
-    terms: '',
-    requests: '',
-    protectIP: '',
+    termsAndConditions: '',
+    specificRequests: '',
+    protectedIP: false,
   });
 
   const [currentItem, setCurrentItem] = useState({
@@ -66,6 +66,9 @@ const RegisterPage: React.FC = () => {
   });
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [developerId, setDeveloperId] = useState<string | null>(null);
 
   const scrollToTarget = React.useRef<HTMLDivElement>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -117,6 +120,7 @@ const RegisterPage: React.FC = () => {
   
     const { result } = await response.json();
     console.log('Uploaded portfolio item:', result);
+    return result;
   };
 
   useEffect(() => {
@@ -126,35 +130,15 @@ const RegisterPage: React.FC = () => {
   }, [registrationData.userType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Handle form submission
+    e.preventDefault();
     console.log(registrationData);
-    // Insert the portfolio items
+
     const portfolioItemsToInsert = registrationData.portfolioItems.map((item) => ({
       title: item.title,
       link: item.link,
       protected_ip: item.protectedIP,
-      user_id: '',
     }));
 
-    const { data: user, error } = await supabaseClient.auth.signUp({
-      email: registrationData.email,
-      password: registrationData.password,
-      options: {
-        data: {
-          full_name: registrationData.name,
-          user_type: registrationData.userType,
-        },
-      }
-    })
-
-    if (error) {
-      console.log(error)
-      return
-    }
-
-    const user_id = user.user?.id;
-    portfolioItemsToInsert.forEach((item) => { item.user_id = user_id as string });
-    
     const portfolio = await uploadPortfolioItem('portfolio_items', portfolioItemsToInsert);
 
     if (portfolio === null) {
@@ -168,20 +152,48 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
+    const { error } = await supabaseClient.auth.signUp({
+      email: registrationData.email,
+      password: registrationData.password,
+      options: {
+        data: {
+          full_name: registrationData.name,
+          user_type: registrationData.userType,
+          portfolio_id: portfolio.id,
+          client_project_id: clientId,
+          developer_id: developerId,
+        },
+      },
+    });    
+
+    if (error) {
+      console.log(error)
+      toast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+      return
+    }
+
     toast({
       title: 'Account created.',
       description: 'Your account has been created. Please check your email to verify your account.',
       status: 'success',
-      duration: 5000,
+      duration: 9000,
       isClosable: true,
     })
+
+    router.push('/dashboard')
   };
 
   const renderForm = () => {
     if (registrationData.userType === 'client') {
-      return <ClientProjectForm forwardRef={scrollToTarget} formData={clientFormData} setFormData={setClientFormData} />;
+      return <ClientProjectForm forwardRef={scrollToTarget} formData={clientFormData} setFormData={setClientFormData} setClientId={setClientId} />;
     } else if (registrationData.userType === 'developer') {
-      return <DeveloperRegistrationForm forwardRef={scrollToTarget} formData={devFormData} setFormData={setDevFormData} />;
+      return <DeveloperRegistrationForm forwardRef={scrollToTarget} formData={devFormData} setFormData={setDevFormData} setDeveloperId={setDeveloperId} />;
     }
     return null;
   };
@@ -215,6 +227,7 @@ const RegisterPage: React.FC = () => {
   return (
     <VStack spacing={4}>
       <RegistrationForm
+        renderForm={renderForm}
         registrationData={registrationData}
         handleChange={handleChange}
         handleRoleChange={handleRoleChange}
@@ -227,7 +240,6 @@ const RegisterPage: React.FC = () => {
         portfolioItems={registrationData.portfolioItems}
         editingIndex={editingIndex}
       />
-      {renderForm()}
       <Button onClick={onOpen}>View Registration Data</Button>
       <Drawer isOpen={isOpen} onClose={onClose} placement="bottom" size="full">
         <DrawerOverlay />

@@ -8,28 +8,54 @@ import {
   Input,
   VStack,
   Textarea,
-  CheckboxGroup,
   Checkbox,
   Heading,
   useToast,
   Text,
+  Tooltip,
+  HStack,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+import { InfoOutlineIcon } from '@chakra-ui/icons';
 
 interface ClientRegistrationProps {
   formData: any;
   setFormData: any;
   forwardRef: React.RefObject<HTMLDivElement>;
+  setClientId: any;
 }
 
-const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, setFormData, forwardRef }) => {
+const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, setFormData, forwardRef, setClientId }) => {
   const toast = useToast();
-  const router = useRouter();
   const [step, setStep] = useState(0);
 
   const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleMilestoneChange = (index: number, field: string, value: any) => {
+    const newMilestones = [...formData.milestones];
+    newMilestones[index] = {
+      ...newMilestones[index],
+      [field]: value,
+    };
+    setFormData({ ...formData, milestones: newMilestones });
+  };
+  
+  const addMilestone = () => {
+    setFormData({
+      ...formData,
+      milestones: [
+        ...formData.milestones,
+        { description: "", targetDate: "" },
+      ],
+    });
+  };
+  
+  const removeMilestone = (index: number) => {
+    const updatedMilestones = [...formData.milestones];
+    updatedMilestones.splice(index, 1);
+    setFormData({ ...formData, milestones: updatedMilestones });
   };
 
   const uploadClient = async (database: string, values: any[]) => {
@@ -52,12 +78,11 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
     const clientData = {
       scope: formData.scope,
       milestones: formData.milestones,
-      milestoneDates: formData.milestoneDates,
       cost: formData.cost,
-      termsAndConditions: formData.termsAndConditions,
-      specificRequests: formData.specificRequests,
-      projectIP: formData.projectIP,
-    };
+      terms_and_conditions: formData.termsAndConditions,
+      specific_requests: formData.specificRequests,
+      protected_ip: formData.protectedIP,
+    };    
 
     const client = await uploadClient('client_projects', [clientData]);
   
@@ -71,15 +96,15 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
       });
       return;
     }
+
+    setClientId(client[0].id);
     toast({
       title: 'Client registration complete.',
-      description: 'Your registration has been submitted.',
+      description: 'Your registration has been submitted. Please continue to add your email and portfolio items.',
       status: 'success',
       duration: 5000,
       isClosable: true,
     });
-
-    router.push('/dashboard');
   };
 
   const nextStep = () => setStep(step + 1);
@@ -90,7 +115,11 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
       case 0:
         return (
           <FormControl isRequired>
-            <FormLabel>Scope</FormLabel>
+            <FormLabel>Scope{' '}
+              <Tooltip label="Describe the overall project requirements and objectives.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Textarea
               name="scope"
               value={formData.scope}
@@ -103,33 +132,52 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
         return (
           <>
           <FormControl isRequired>
-            <FormLabel>Milestones</FormLabel>
-            <Textarea
-              name="milestones"
-              value={formData.milestones}
-              onChange={handleFormChange}
-              required
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Milestone Dates</FormLabel>
-            <Input
-              type="text"
-              name="milestoneDates"
-              value={formData.milestoneDates}
-              onChange={handleFormChange}
-              required
-            />
+            <FormLabel>
+              Milestones{" "}
+              <Tooltip label="List the major project milestones and their expected outcomes.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
+            {formData.milestones.map((milestone: any, index: number) => (
+              <HStack key={index} spacing={4}>
+                <Input
+                  placeholder="Milestone description"
+                  name="description"
+                  value={milestone.description}
+                  onChange={(e) =>
+                    handleMilestoneChange(index, "description", e.target.value)
+                  }
+                  required
+                />
+                <Input
+                  type="date"
+                  name="targetDate"
+                  value={milestone.targetDate}
+                  onChange={(e) =>
+                    handleMilestoneChange(index, "targetDate", e.target.value)
+                  }
+                  required
+                />
+                <Button onClick={() => removeMilestone(index)}>Remove</Button>
+              </HStack>
+            ))}
+            <Button onClick={addMilestone} mt={2}>
+              Add Milestone
+            </Button>
           </FormControl>
           </>
         );
       case 2:
         return (
           <FormControl isRequired>
-            <FormLabel>Cost</FormLabel>
+            <FormLabel>Budget Range{' '}
+              <Tooltip label="Enter the estimated budget range for your project.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Input
-              type="number"
-              name="cost"
+              type="text"
+              name="budget"
               value={formData.cost}
               onChange={handleFormChange}
               required
@@ -139,7 +187,11 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
       case 3:
         return (
           <FormControl isRequired>
-            <FormLabel>Terms and Conditions</FormLabel>
+            <FormLabel>Terms and Conditions{' '}
+              <Tooltip label="Specify the terms and conditions for the project.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Textarea
               name="termsAndConditions"
               value={formData.termsAndConditions}
@@ -150,29 +202,34 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
         );
       case 4:
         return (
-          <FormControl isRequired>
-            <FormLabel>Specific Requests</FormLabel>
+          <FormControl>
+            <FormLabel>Specific Requests{' '}
+              <Tooltip label="List any specific requests or requirements you have for the project.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
             <Textarea
               name="specificRequests"
               value={formData.specificRequests}
               onChange={handleFormChange}
-              required
             />
           </FormControl>
         );
       case 5:
         return (
           <FormControl>
-            <FormLabel>Protect IP</FormLabel>
-            <CheckboxGroup>
-              <Checkbox
-                name="projectIP"
-                isChecked={formData.protectIP}
-                onChange={handleFormChange}
-              >
-                Protected IP
-              </Checkbox>
-            </CheckboxGroup>
+            <FormLabel>Protect IP{' '}
+              <Tooltip label="Check this box to protect your project's intellectual property.">
+                <InfoOutlineIcon mb={3} boxSize={3} />
+              </Tooltip>
+            </FormLabel>
+            <Checkbox
+              name="protectedIP"
+              isChecked={formData.protectedIP}
+              onChange={(e) => setFormData({ ...formData, protectedIP: e.target.checked })}
+            >
+              Protected IP
+            </Checkbox>
           </FormControl>
         );
       default:
@@ -192,7 +249,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
         <VStack spacing={4}>
           {renderStepContent()}
           {step > 0 && <Button onClick={prevStep}>Previous</Button>}
-          {step < 6 ? (
+          {step < 5 ? (
             <Button onClick={nextStep}>Next</Button>
           ) : (
             <Button type="submit">Submit</Button>
