@@ -68,7 +68,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
     });
   
     const { result } = await response.json();
-    console.log('Uploaded portfolio items:', result);
+    console.log('Uploaded items:', result);
     return result;
   };
 
@@ -98,6 +98,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
     }
 
     setClientId(client[0].id);
+    console.log('Client return', client);
     toast({
       title: 'Client registration complete.',
       description: 'Your registration has been submitted. Please continue to add your email and portfolio items.',
@@ -177,7 +178,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
             </FormLabel>
             <Input
               type="text"
-              name="budget"
+              name="cost"
               value={formData.cost}
               onChange={handleFormChange}
               required
@@ -248,9 +249,16 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           {renderStepContent()}
-          {step > 0 && <Button onClick={prevStep}>Previous</Button>}
+          {step > 0 && <Button variant="ghost" onClick={prevStep}>Previous</Button>}
           {step < 5 ? (
-            <Button onClick={nextStep}>Next</Button>
+            <Button variant="ghost"
+              onClick={(e) => {
+                e.preventDefault();
+                nextStep();
+              }}
+            >
+              Next
+            </Button>          
           ) : (
             <Button type="submit">Submit</Button>
           )}
