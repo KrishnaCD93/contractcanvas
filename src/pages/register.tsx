@@ -110,18 +110,18 @@ const RegisterPage: React.FC = () => {
   };
 
   const uploadPortfolioItem = async (database: string, values: any[]) => {
-    const response = await fetch('/api/supabase-post', {
+    const response = await fetch(`/api/supabase-fetch?database=${database}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ database, values }),
+      body: JSON.stringify({ values }),
     });
   
     const { result } = await response.json();
     console.log('Uploaded portfolio item:', result);
     return result;
-  };
+  };  
 
   useEffect(() => {
     if (registrationData.userType !== '' && scrollToTarget.current) {
@@ -139,9 +139,9 @@ const RegisterPage: React.FC = () => {
       protected_ip: item.protectedIP,
     }));
 
-    const portfolio = await uploadPortfolioItem('portfolio_items', portfolioItemsToInsert);
+    const portfolioId = await uploadPortfolioItem('portfolio_items', portfolioItemsToInsert);
 
-    if (portfolio === null) {
+    if (portfolioId === '') {
       toast({
         title: 'Error',
         description: 'There was an error uploading your portfolio items.',
@@ -159,7 +159,7 @@ const RegisterPage: React.FC = () => {
         data: {
           full_name: registrationData.name,
           user_type: registrationData.userType,
-          portfolio_id: portfolio.id,
+          portfolio_id: portfolioId,
           client_project_id: clientId,
           developer_id: developerId,
         },

@@ -60,18 +60,18 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
   };
 
   const uploadDev = async (database: string, values: any[]) => {
-    const response = await fetch('/api/supabase-post', {
+    const response = await fetch(`/api/supabase-fetch?database=${database}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ database, values }),
+      body: JSON.stringify({ values }),
     });
   
     const { result } = await response.json();
     console.log('Uploaded dev data:', result);
     return result;
-  };
+  };  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,7 +93,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
   
     const dev = await uploadDev('developers', [developerData]);
   
-    if (dev === null) {
+    if (dev === '') {
       toast({
         title: 'Developer registration failed.',
         description: 'There was an error submitting your registration.',
@@ -104,7 +104,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
       return;
     }
   
-    setDeveloperId(dev[0].id);
+    setDeveloperId(dev);
     toast({
       title: 'Developer registration complete.',
       description: 'Your developer profile is complete. Please continue to register your email and portfolio.',

@@ -59,18 +59,18 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
   };
 
   const uploadClient = async (database: string, values: any[]) => {
-    const response = await fetch('/api/supabase-post', {
+    const response = await fetch(`/api/supabase-fetch?database=${database}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ database, values }),
+      body: JSON.stringify({ values }),
     });
   
     const { result } = await response.json();
     console.log('Uploaded items:', result);
     return result;
-  };
+  };  
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
 
     const client = await uploadClient('client_projects', [clientData]);
   
-    if (!client) {
+    if (client === '') {
       toast({
         title: 'Client registration failed.',
         description: 'There was an error submitting your registration.',
@@ -97,7 +97,7 @@ const ClientRegistrationForm: React.FC<ClientRegistrationProps> = ({ formData, s
       return;
     }
 
-    setClientId(client[0].id);
+    setClientId(client);
     console.log('Client return', client);
     toast({
       title: 'Client registration complete.',

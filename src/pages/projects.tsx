@@ -1,70 +1,62 @@
 // /pages/Projects.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  VStack,
   Heading,
   Text,
   SimpleGrid,
   Spinner,
   Container,
 } from '@chakra-ui/react';
-
-interface Project {
-  id: string;
-  scope: string;
-  milestones: string;
-  milestone_dates: string;
-  cost: number;
-  terms_and_conditions: string;
-  specific_requests: string;
-  project_ip: boolean;
-}
-
-const fetchProjects = async () => {
-  const response = await fetch('/api/supabase-get?database=client_projects', {
-    method: 'GET',
-  });
-
-  const { result } = await response.json();
-  return result;
-};
-
-const ProjectCard: React.FC<Project> = ({
-  scope,
-  milestones,
-  milestone_dates,
-  cost,
-  terms_and_conditions,
-  specific_requests,
-  project_ip,
-}) => {
-  return (
-    <Box borderWidth="1px" borderRadius="lg" p={6} boxShadow="lg">
-      <VStack align="start" spacing={4}>
-        <Text><b>Scope:</b> {scope}</Text>
-        <Text><b>Milestones:</b> {milestones}</Text>
-        <Text><b>Milestone Dates:</b> {milestone_dates}</Text>
-        <Text><b>Cost:</b> ${cost}</Text>
-        <Text><b>Terms and Conditions:</b> {terms_and_conditions}</Text>
-        <Text><b>Specific Requests:</b> {specific_requests}</Text>
-        <Text><b>Project IP:</b> {project_ip ? 'Protected' : 'Not Protected'}</Text>
-      </VStack>
-    </Box>
-  );
-};
+import { ProjectCard, Project } from '@/components/ProjectCard';
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/supabase-fetch?database=client_projects', {
+        method: 'GET',
+      });
+  
+      const { result } = await response.json();
+      return result;
+    } catch (err) {
+      setError('Error fetching projects.');
+      return [];
+    }
+  };
+
+  const fetchAndSetProjects = useCallback(async () => {
+    const fetchedProjects = await fetchProjects();
+    if (fetchedProjects) {
+      setProjects(fetchedProjects);
+    }
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    async function fetchAndSetProjects() {
-      setProjects(await fetchProjects());
-      setLoading(false);
-    }
     fetchAndSetProjects();
-  }, []);
+  }, [fetchAndSetProjects]);  
+
+  const deleteProject = async (id: string) => {
+    const response = await fetch(`/api/supabase-fetch?database=client_projects&id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    const { result } = await response.json();
+    return result;
+  };  
+  
+  const handleDelete = async (id: string) => {
+    await deleteProject(id);
+    setProjects(projects.filter((project) => project.id !== id));
+  };
 
   if (loading) {
     return (
@@ -73,7 +65,15 @@ const Projects = () => {
       </Container>
     );
   }
-
+  
+  if (error) {
+    return (
+      <Container centerContent>
+        <Text>Error: {error}</Text>
+      </Container>
+    );
+  }
+  
   return (
     <Box>
       <Heading as="h1" size="2xl" textAlign="center" mb={6}>
@@ -81,11 +81,11 @@ const Projects = () => {
       </Heading>
       <SimpleGrid columns={[1, null, 2]} spacing={10}>
         {projects.map((project) => (
-          <ProjectCard key={project.id} {...project} />
+          <ProjectCard key={project.id} {...project} onDelete={handleDelete} />
         ))}
       </SimpleGrid>
     </Box>
   );
-};
+};  
 
 export default Projects;
