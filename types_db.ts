@@ -19,6 +19,7 @@ export interface Database {
           scope: string | null
           specific_requests: string | null
           terms_and_conditions: string | null
+          user_id: string | null
         }
         Insert: {
           cost?: string | null
@@ -29,6 +30,7 @@ export interface Database {
           scope?: string | null
           specific_requests?: string | null
           terms_and_conditions?: string | null
+          user_id?: string | null
         }
         Update: {
           cost?: string | null
@@ -39,6 +41,7 @@ export interface Database {
           scope?: string | null
           specific_requests?: string | null
           terms_and_conditions?: string | null
+          user_id?: string | null
         }
       }
       developers: {
@@ -50,6 +53,7 @@ export interface Database {
           rate: string | null
           resume_url: string | null
           skills: string | null
+          user_id: string | null
         }
         Insert: {
           availability?: string | null
@@ -59,6 +63,7 @@ export interface Database {
           rate?: string | null
           resume_url?: string | null
           skills?: string | null
+          user_id?: string | null
         }
         Update: {
           availability?: string | null
@@ -68,6 +73,7 @@ export interface Database {
           rate?: string | null
           resume_url?: string | null
           skills?: string | null
+          user_id?: string | null
         }
       }
       portfolio_items: {
@@ -77,6 +83,7 @@ export interface Database {
           link: string | null
           protected_ip: string | null
           title: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -84,6 +91,7 @@ export interface Database {
           link?: string | null
           protected_ip?: string | null
           title?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -91,6 +99,7 @@ export interface Database {
           link?: string | null
           protected_ip?: string | null
           title?: string | null
+          user_id?: string | null
         }
       }
       profiles: {
