@@ -26,7 +26,6 @@ interface DeveloperRegistrationProps {
 const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formData, setFormData, forwardRef, setDeveloperId }) => {
   const toast = useToast();
   const [step, setStep] = useState(0);
-  const [resumeUrl, setResumeUrl] = useState('');
 
   const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
@@ -46,7 +45,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
   };
 
   const uploadResume = async () => {
-    const response = await fetch('/api/supabase-post-storage', {
+    const response = await fetch('/api/supabase-storage', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,7 +79,6 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
     let uploadedResumeUrl = '';
     if (formData.resume) {
       uploadedResumeUrl = await uploadResume();
-      setResumeUrl(uploadedResumeUrl);
     }
   
     const developerData = {
@@ -199,7 +197,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> =({ formDa
             </FormLabel>
             <Textarea
               name="exclusions"
-              value={formData.exclusions}
+              defaultValue={formData.exclusions.join(', ')}
               onChange={handleFormChange}
             />
             <FormHelperText>List any project types or industries you prefer not to work in.</FormHelperText>
