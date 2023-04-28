@@ -31,6 +31,7 @@
     "react-hook-form": "^7.43.9",
     "react-icons": "^4.8.0",
     "react-markdown": "^8.0.7",
+    "redis": "^4.6.6",
     "typescript": "5.0.4"
   },
   "devDependencies": {
