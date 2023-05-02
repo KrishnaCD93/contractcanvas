@@ -11,12 +11,15 @@
   - ELO rating
   - TrueSkill rating */
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Database } from '../../types_db';
 import { OpenAIApi, Configuration } from 'openai';
 import { inspect } from 'util';
+import type { GetServerSideProps } from 'next';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
 
 interface Profile {
   id: string;
@@ -26,14 +29,15 @@ interface Profile {
   portfolio_id: string;
 }
 
-interface PortfolioItem {
+interface PortfolioItem extends Profile {
   id: string;
   title: string;
   link: string;
   protected_ip: boolean;
 }
 
-interface Developer {
+interface Developer extends PortfolioItem {
+  resume: Blob;
   id: string;
   user_id: string;
   rate: number;
@@ -41,6 +45,8 @@ interface Developer {
   availability: string;
   skills: string[];
   exclusions: string;
+  portfolioItems: PortfolioItem[];
+  profile: Profile; 
 }
 
 interface Resume {
@@ -58,27 +64,85 @@ interface ClientProject {
   protected_ip: boolean;
 }
 
-export const MatchUsers = (developer: Developer, clientProjects: ClientProject[]) => {
+type Props = {
+  developer: Developer;
+}
+
+const MatchUsers = async ({ developer }: Props, client: any) => {
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [resume, setResume] = useState<Resume | null>(null);
-  const [resumeEmbedding, setResumeEmbedding] = useState<number[]>([]);
-  const [projectEmbeddings, setProjectEmbeddings] = useState<number[][]>([]);
-  const [matchRating, setMatchRating] = useState<number[]>([]);
-  const [matchRanking, setMatchRanking] = useState<number[]>([]);
-  const [clientEmail, setClientEmail] = useState<string | null>(null);
 
-
-
-  async function readResumeAndCrawlPortfolio() {
-    // Implementation for reading resume and crawling portfolio website
+  async function readPDFContent(resumeBlob: Blob): Promise<string> {
+    const arrayBuffer = await resumeBlob.arrayBuffer();
+    const pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+    let content = '';
+    for (let i = 1; i <= pdfDocument.numPages; i++) {
+      const page = await pdfDocument.getPage(i);
+      const textContent = await page.getTextContent();
+      content += textContent.items.map(item => 'str' in item ? item.str : '').join(' ');
   }
   
-  async function generateEmbeddings(input: string) {
-    // Implementation for generating OpenAI embeddings for resume, portfolio, and projects
+    return content;
+  }
+
+  async function readDocxContent(resumeBlob: Blob): Promise<string> {
+    const arrayBuffer = await resumeBlob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const result = await mammoth.extractRawText({ buffer });
+  
+    return result.value;
+  }
+  
+    async function crawlPortfolio(portfolioItems: PortfolioItem[]): Promise<string> {
+      // Implementation for reading resume and crawling portfolio website
+      // Crawl portfolio websites
+      if (!portfolioItems) return '';
+      const portfolioItemsData = await Promise.all(
+        portfolioItems.map(async (item: any) => {
+          // Fetch the content of the portfolio item's link
+          const itemResponse = await fetch(item.link);
+          if (itemResponse.ok) {
+            const html = await itemResponse.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+    
+            // Extract relevant information from the crawled website
+            const pageTitle = doc.querySelector('title')?.innerText;
+            const pageDescription = doc.querySelector('meta[name="description"]')?.getAttribute('content');
+            const pageKeywords = doc.querySelector('meta[name="keywords"]')?.getAttribute('content');
+    
+            return `${pageTitle} ${pageDescription} ${pageKeywords}`;
+          } else {
+            console.error('Error fetching portfolio item link:', itemResponse.status, itemResponse.statusText);
+            return '';
+          }
+        })
+      );
+    
+    const itemsAsString = portfolioItemsData.join(' ');
+  
+    return itemsAsString;
+  }
+
+  // crawl portfolio
+  async function callCrawlPortfolio(portfolioItems: PortfolioItem[]) {
+    const portfolioItemsData = await crawlPortfolio(portfolioItems);
+    return portfolioItemsData;
+  }
+  
+  async function cleanData(content: string): Promise<string> {
+    // Implementatfeature engineering techniques to clean up developer data (resume, portfolio) and client requests (projects)
+    const input = content.replace(/\n/g, ' ');
+    const cleanedInput = input.replace(/[^a-zA-Z0-9 ]/g, '');
+    
+    return cleanedInput || '';
+  }
+  
+  async function generateEmbeddings(input: string): Promise<any[]> {
+    // Implementation for generating OpenAI embeddings for resume, portfolio, and projects=
+    let embeddings;
     try {
       const configuration = new Configuration({
         apiKey: process.env.OPENAI_KEY,
@@ -89,17 +153,34 @@ export const MatchUsers = (developer: Developer, clientProjects: ClientProject[]
         model: 'text-embedding-ada-002',
         input,
       })
+
+      embeddings = embeddingResponse.data?.data;
+
     } catch (error: any) {
       console.error('Error generating embeddings:', error.message);
     }
+
+    return embeddings || [];
+  }
+
+  function cosineSimilarity(a: any[], b: any[]) {
+    const dotProduct = a.reduce((sum, aVal, idx) => sum + aVal * b[idx], 0);
+    const aMagnitude = Math.sqrt(a.reduce((sum, aVal) => sum + aVal * aVal, 0));
+    const bMagnitude = Math.sqrt(b.reduce((sum, bVal) => sum + bVal * bVal, 0));
+  
+    return dotProduct / (aMagnitude * bMagnitude);
   }
   
-  async function matchProjects() {
-    // Implementation for creating a match rating and ranking of jobs
-  }
+  async function calculateSimilarity(devEmbeddings: any[], clientEmbeddings: any[]): Promise<number> {
+    // Calculate similarity score between developer and client using cosine similarity
+    if (devEmbeddings.length === 0 || clientEmbeddings.length === 0) {
+      console.error('Error calculating similarity score: Empty embeddings');
+      return 0;
+    }
   
-  async function storeEmbeddings() {
-    // Implementation for storing generated embeddings in Supabase Vector database
+    const similarityScore = cosineSimilarity(devEmbeddings, clientEmbeddings);
+  
+    return similarityScore;
   }
   
   async function createZKPCircuit() {
@@ -110,4 +191,93 @@ export const MatchUsers = (developer: Developer, clientProjects: ClientProject[]
     // Implementation for sending ZKP keys and client email to the developer
   }
   
+  const handleMatch = async () => {
+    // Implementation for handling the match process
+    // Read resume content
+    async function readResumeContent(resumeBlob: Blob,): Promise<string> {
+      const fileType = resumeBlob.type.split('/')[1];
+      if (fileType === 'pdf') {
+        const pdfContent = await readPDFContent(resumeBlob);
+        return pdfContent;
+      } else if (fileType === 'docx') {
+        const docxContent = await readDocxContent(resumeBlob);
+        return docxContent;
+      } else {
+        throw new Error('Unsupported file type');
+      }
+    }
+
+    const resumeString = await readResumeContent(developer.resume);
+    const portfolioString = await callCrawlPortfolio(developer.portfolioItems);
+    const cleanedDevString = await cleanData(`${resumeString} ${portfolioString}`);
+    const devEmbeddings = await generateEmbeddings(cleanedDevString);
+    const clientEmbeddings = await generateEmbeddings(client.toSting());
+    const similarityScore = await calculateSimilarity(devEmbeddings, clientEmbeddings);
+  }
+  await handleMatch();
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Implementation for getting developer and client data from Supabase
+  const supabase = createServerSupabaseClient(context);
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
+
+  if (!session)
+  return {
+    redirect: {
+      destination: '/login',
+      permanent: false,
+    },
+  }
+
+  const user = session.user;
+
+  const { data: userProfile, error: developerError } = await supabase
+    .from('profiles')
+    .select('full_name, developer_id, portfolio_id')
+    .eq('id', user.id)
+
+  if (developerError) {
+    console.error('Error getting developer profile:', developerError.message);
+  }
+
+  const { data: portfolioItems, error: portfolioError } = await supabase
+    .from('portfolio_items')
+    .select('id, title, link, protected_ip')
+    .eq('user_id', user.id)
+
+  if (portfolioError) {
+    console.error('Error getting portfolio items:', portfolioError.message);
+  }
+
+  if (userProfile) {
+  const { data: devInfo, error: developerDataError } = await supabase
+    .from('developers')
+    .select('rate, resumeUrl, availability, skills, exclusions')
+    .eq('id', userProfile[0].developer_id)
+    
+    if (developerDataError) {
+      console.error('Error getting developer data:', developerDataError.message);
+    }
+
+    if (devInfo) {
+      return {
+        props: {
+          developer: {
+              profile: userProfile[0],
+              portfolioItems,
+              ...devInfo[0],
+          },
+        }
+      }
+    }
+  }
+
+  return {
+    props: {}
+  }
+}
+
+export default MatchUsers;

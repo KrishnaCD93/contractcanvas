@@ -1,22 +1,27 @@
 // /pages/api/supabase-storage.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+const multer = require('multer');
 import { Database } from '../../../types_db';
 
+const upload = multer({ storage: multer.memoryStorage() });
+
+interface MulterNextApiRequest extends NextApiRequest {
+  file: any;
+}
+
 // Function to process POST requests
-async function processPost(req: NextApiRequest, res: NextApiResponse, supabase: any) {
-  const file = req.body.file;
+async function processPost(req: MulterNextApiRequest, res: NextApiResponse, supabase: any) {
+  const file = req.file;
+  const fileName = file.originalname;
 
   if (!file) {
     return res.status(400).json({ error: 'No file provided' });
   }
 
-  const fileExtension = file.name.split('.').pop();
-  const fileName = `${new Date().getTime()}.${fileExtension}`;
-
   const { error: uploadError } = await supabase.storage
     .from('resumes')
-    .upload(fileName, file);
+    .upload(fileName, file.buffer, { contentType: file.mimetype });
 
   if (uploadError) {
     console.error('Error uploading file:', uploadError);
@@ -24,6 +29,36 @@ async function processPost(req: NextApiRequest, res: NextApiResponse, supabase: 
   }
 
   return res.status(200).json({ message: 'File uploaded successfully', fileName });
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createServerSupabaseClient<Database>({ req, res });
+
+  if (req.method === 'POST') {
+    upload.single('file')(req, res, async (err: any) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error processing file' });
+      }
+      await processPost(req as MulterNextApiRequest, res, supabase);
+    });
+  } else {
+    switch (req.method) {
+      case 'GET':
+        await processGet(req, res, supabase);
+        break;
+      case 'DELETE':
+        await processDelete(req, res, supabase);
+        break;
+      default:
+        res.status(405).json({ message: 'Method not allowed' });
+    }
+  }
 }
 
 // Function to process GET requests
@@ -56,22 +91,4 @@ async function processDelete(req: NextApiRequest, res: NextApiResponse, supabase
   }
 
   return res.status(200).json({ message: 'File deleted successfully' });
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const supabase = createServerSupabaseClient<Database>({ req, res });
-
-  switch (req.method) {
-    case 'POST':
-      await processPost(req, res, supabase);
-      break;
-    case 'GET':
-      await processGet(req, res, supabase);
-      break;
-    case 'DELETE':
-      await processDelete(req, res, supabase);
-      break;
-    default:
-      res.status(405).json({ message: 'Method not allowed' });
-  }
 }
