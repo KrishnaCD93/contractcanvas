@@ -10,10 +10,12 @@ import { Database } from '../../types_db';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import PasswordRegistration from '@/components/Registration/PasswordRegistration';
 import ProgressIndicator from '@/components/Registration/ProgressIndicator';
+import DevDrawer from '@/components/Drawer';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [developerId, setDeveloperId] = useState('');
+  const [devInfo, setDevInfo] = useState<any>({});
+  const [devZKP, setDevZKP] = useState<any>({});
   const [portfolioIds, setPortfolioIds] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>({});
   
@@ -50,7 +52,6 @@ const Register: React.FC = () => {
           full_name: userData.firstName + ' ' + userData.lastName,
           user_type: 'developer',
           portfolio_ids: portfolioIdsToInsert,
-          developer_id: developerId,
           bio: userData.bio,
         }
       }
@@ -74,18 +75,17 @@ const Register: React.FC = () => {
       });
       router.push('/dashboard');
     }
-  }, [developerId, portfolioIds, userData, supabaseClient, toast, router]);
+  }, [portfolioIds, userData, supabaseClient, toast, router]);
 
   useEffect(() => {
     if (
-      developerId !== '' &&
       portfolioIds.length > 0 &&
       Object.keys(userData).length > 0 &&
       step === 4
     ) {
       handleSignUp();
     }
-  }, [developerId, portfolioIds, step, userData, handleSignUp]);
+  }, [portfolioIds, step, userData, handleSignUp]);
 
   const renderForm = () => {
     switch (step) {
@@ -93,7 +93,8 @@ const Register: React.FC = () => {
         return (
           <DeveloperRegistrationForm
             forwardRef={devRef}
-            setDeveloperId={setDeveloperId}
+            setDevInfo={setDevInfo}
+            setDevZKP={setDevZKP}
             setStep={setStep}
           />
         );
@@ -134,6 +135,7 @@ const Register: React.FC = () => {
       <VStack spacing={8} width="100%" py={12}>
         <ProgressIndicator step={step} />
         {renderForm()}
+        <DevDrawer devZKP={devZKP} title="Developer ZKP" />
       </VStack>
     </Container>
   );
