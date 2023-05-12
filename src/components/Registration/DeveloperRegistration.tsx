@@ -22,7 +22,6 @@ import {
   TabPanel,
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
-import { set } from '@project-serum/anchor/dist/cjs/utils/features';
 
 interface DeveloperRegistrationProps {
   forwardRef: React.RefObject<HTMLDivElement>;
@@ -62,7 +61,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };  
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
@@ -75,19 +74,19 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
     if (!formData.resume) {
       return '';
     }
-  
+
     const formDataToSend = new FormData();
     formDataToSend.append('file', formData.resume);
-  
+
     const response = await fetch('/api/supabase-storage', {
       method: 'POST',
       body: formDataToSend,
     });
-  
+
     const { result } = await response.json();
     console.log('Uploaded resume:', result);
     return result;
-  };  
+  };
 
   const uploadDev = async (values: any) => {
     const response = await fetch(`/api/selective-disclodure`, {
@@ -97,11 +96,11 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
       },
       body: JSON.stringify({ values }),
     });
-  
+
     const { result } = await response.json();
     console.log('Uploaded dev data:', result);
     return result;
-  };  
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,7 +124,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
       skillsDisclosed: skillsDisclosed,
       exclusions: formData.exclusions.split(',').map((exclusion: string) => exclusion.trim()),
       exclusionsDisclosed: exclusionsDisclosed,
-    });    
+    });
 
     const developerData = {
       rate: formData.rate,
@@ -198,7 +197,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
           break;
       }
     };
-  
+
     return (
       <Tabs isFitted variant='enclosed' index={devStep} onChange={index => setDevStep(index)}>
         <TabList mb='1em'>
@@ -207,7 +206,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
           <Tab minW={150} color={availabilityValidated ? "inherit" : "red"}>Availability {availabilityValidated ? "" : "*"}</Tab>
           <Tab minW={150} color={skillsValidated ? "inherit" : "red"}>Skills {skillsValidated ? "" : "*"}</Tab>
           <Tab minW={150} color={exclusionsValidated ? "inherit" : "red"}>Exclusions</Tab>
-        </TabList>  
+        </TabList>
         <TabPanels>
           <TabPanel>
             <FormControl isRequired>
@@ -315,7 +314,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
                 value={formData.skills}
                 onChange={handleFormChange}
                 required
-                />
+              />
               <FormHelperText>List your skills separated by commas.</FormHelperText>
               <Checkbox
                 value="skillsDisclosed"
@@ -389,12 +388,12 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
         <VStack spacing={4}>
           {renderStepContent()}
           {devStep < 4 ? (
-            <Button variant='ghost' onClick={(e)=>{
+            <Button variant='ghost' onClick={(e) => {
               e.preventDefault()
               setDevStep(devStep + 1)
             }}>Next</Button>
           ) : (
-            <Button 
+            <Button
               isLoading={loading}
               loadingText="Creating your ZKP..."
               type="submit"

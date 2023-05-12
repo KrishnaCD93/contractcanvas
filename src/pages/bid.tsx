@@ -18,11 +18,14 @@ const BidPage = () => {
   const [proof, setProof] = useState('');
   const [signals, setSignals] = useState('');
   const [isValid, setIsValid] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const toast = useToast();
 
   const runProofs = async () => {
     if (maxBudget.length === 0 || acceptedPrice.length === 0) return;
+
+    setLoading(true);
 
     const response = await fetch('/api/bid-validity', {
       method: 'POST',
@@ -34,6 +37,8 @@ const BidPage = () => {
     setProof(JSON.stringify(_proof, null, 2));
     setSignals(JSON.stringify(_signals, null, 2));
     setIsValid(_isValid);
+
+    setLoading(false);
   };
 
   const changeMaxBudget = (e: { target: { value: React.SetStateAction<string> } }) => setMaxBudget(e.target.value);
@@ -53,7 +58,7 @@ const BidPage = () => {
           <FormLabel>Accepted Price</FormLabel>
           <Input type="number" value={acceptedPrice} onChange={changeAcceptedPrice} />
         </FormControl>
-        <Button onClick={runProofs} colorScheme="blue">
+        <Button isLoading={loading} onClick={runProofs} colorScheme="blue">
           Submit Bid
         </Button>
       </VStack>
