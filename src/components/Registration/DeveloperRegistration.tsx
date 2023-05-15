@@ -26,7 +26,6 @@ interface DeveloperRegistrationProps extends DeveloperZKP {
   forwardRef: React.RefObject<HTMLDivElement>;
   setDevInfo: (devInfo: any) => void;
   setDevZKP: (devZKP: DeveloperZKP) => void;
-  setStep: (step: number) => void;
   rate: string;
 }
 
@@ -96,7 +95,6 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   setDevInfo,
   setDevZKP,
   rate,
-  setStep,
 }) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);

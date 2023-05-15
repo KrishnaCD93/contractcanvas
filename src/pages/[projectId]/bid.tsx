@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+// /pages/[projectId]/bid.tsx
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,12 +12,15 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../components/Registration/DeveloperRegistration';
+import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../../components/Registration/DeveloperRegistration';
 import DevData from '@/components/ViewZKP';
+import { useRouter } from 'next/router';
 
 const BidPage = () => {
-  const [maxBudget, setMaxBudget] = useState('3');
-  const [acceptedPrice, setAcceptedPrice] = useState('11');
+  const router = useRouter();
+  const { projectId } = router.query;
+  const [maxBudget, setMaxBudget] = useState('');
+  const [bidAmount, setBidAmount] = useState('');
   const [proof, setProof] = useState('');
   const [signals, setSignals] = useState('');
   const [isValid, setIsValid] = useState(false);
@@ -33,20 +37,25 @@ const BidPage = () => {
     signals: [],
     isValid: false,
   });
-  const [step, setStep] = useState(1);
 
   const toast = useToast();
   const devRef = useRef<HTMLDivElement>(null);
 
+  const budget = useCallback(() => {
+    fetch('/api/supabase-fetch?table=projects&id=' + projectId, {
+      method: 'GET',
+    })
+  }, [projectId]);
+
   const runProofs = async () => {
-    if (maxBudget.length === 0 || acceptedPrice.length === 0) return;
+    if (maxBudget.length === 0 || bidAmount.length === 0) return;
 
     setLoading(true);
 
     const response = await fetch('/api/bid-validity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ maxBudget, acceptedPrice }),
+      body: JSON.stringify({ maxBudget, bidAmount }),
     });
     const { proof: _proof, publicSignals: _signals, isValid: _isValid } = await response.json();
 
@@ -103,7 +112,7 @@ const BidPage = () => {
   };
 
   const changeMaxBudget = (e: { target: { value: React.SetStateAction<string> } }) => setMaxBudget(e.target.value);
-  const changeAcceptedPrice = (e: { target: { value: React.SetStateAction<string> } }) => setAcceptedPrice(e.target.value);
+  const changeAcceptedPrice = (e: { target: { value: React.SetStateAction<string> } }) => setBidAmount(e.target.value);
 
   return (
     <Box p={4}>
@@ -116,8 +125,8 @@ const BidPage = () => {
           <Input type="number" value={maxBudget} onChange={changeMaxBudget} />
         </FormControl>
         <FormControl isRequired>
-          <FormLabel>Accepted Price</FormLabel>
-          <Input type="number" value={acceptedPrice} onChange={changeAcceptedPrice} />
+          <FormLabel>Bid Amount</FormLabel>
+          <Input type="number" value={bidAmount} onChange={changeAcceptedPrice} />
         </FormControl>
         <Button isLoading={loading} onClick={runProofs} colorScheme="blue">
           Submit Bid
@@ -141,8 +150,7 @@ const BidPage = () => {
               forwardRef={devRef}
               setDevInfo={setDevInfo}
               setDevZKP={setDevZKP}
-              setStep={setStep} 
-              rate={acceptedPrice}
+              rate={bidAmount}
               proof={''} signals={[]} isValid={false} 
             />
             }

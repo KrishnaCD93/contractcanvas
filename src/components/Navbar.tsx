@@ -11,6 +11,8 @@ import {
   MenuItem,
   MenuList,
   Avatar,
+  Button,
+  MenuDivider,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'; // Import useSupabaseClient
@@ -51,7 +53,6 @@ export const Navbar = () => {
 
   useEffect(() => {
     if (user) {
-      console.log('user', user);
       fetchData(user.id);
     }
   }, [user, fetchData]);
@@ -79,18 +80,22 @@ export const Navbar = () => {
               <>
                 <Menu>
                   <MenuButton
-                    as={IconButton}
-                    icon={<FiChevronDown />}
+                    as={Button}
+                    rightIcon={<FiChevronDown />}
                     size="sm"
                     variant="ghost"
-                    colorScheme="whiteAlpha"
                   >
-                    {avatarUrl && <Avatar
+                    {avatarUrl ? <Avatar
                       size="sm"
                       src={avatarUrl}
-                    /> || userName}
+                    /> : 
+                  userName?.split(' ').map((name) => name[0]).join('')}
                   </MenuButton>
                   <MenuList>
+                    <MenuItem onClick={() => router.push('/contract-registration')}>
+                      New Contract
+                    </MenuItem>
+                    <MenuDivider />
                     <MenuItem onClick={() => router.push('/profile')}>
                       Profile
                     </MenuItem>

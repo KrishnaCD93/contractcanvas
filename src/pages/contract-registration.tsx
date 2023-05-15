@@ -8,7 +8,8 @@ import {
   Input,
   VStack,
   Textarea,
-  Checkbox,
+  Radio,
+  RadioGroup,
   Heading,
   useToast,
   Text,
@@ -20,23 +21,24 @@ import {
   TabPanels,
   TabPanel,
   Container,
+  Stack,
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 
 interface Milestone {
-  description: string;
+  milestone: string;
   targetDate: string;
 }
 
 interface FormState {
+  name: string;
+  description: string;
+  protectedIP: boolean;
   scope: string;
   milestones: Milestone[];
   budget: string;
   termsAndConditions: string;
   specificRequests: string;
-  name: string;
-  description: string;
-  protectedIP: boolean;
 }
 
 const ClientRegistrationForm = () => {
@@ -45,14 +47,14 @@ const ClientRegistrationForm = () => {
   const [loading, setLoading] = useState(false);
 
   const initialFormState: FormState = {
-    scope: '',
-    milestones: [{ description: "", targetDate: "" }],
-    budget: '',
-    termsAndConditions: '',
-    specificRequests: '',
     name: '',
     description: '',
     protectedIP: false,
+    scope: '',
+    milestones: [{ milestone: '', targetDate: '' }],
+    budget: '',
+    termsAndConditions: '',
+    specificRequests: ''
   };
   
   const [formState, setFormState] = useState<FormState>(initialFormState);  
@@ -76,7 +78,7 @@ const ClientRegistrationForm = () => {
       ...prev,
       milestones: [
         ...prev.milestones,
-        { description: "", targetDate: "" },
+        { milestone: "", targetDate: "" },
       ],
     }));
   };
@@ -120,14 +122,14 @@ const ClientRegistrationForm = () => {
 
 
     const clientData = {
+      name: formState.name,
+      description: formState.description,
+      protected_ip: formState.protectedIP,
       scope: formState.scope,
       milestones: formState.milestones,
       budget: formState.budget,
       terms_and_conditions: formState.termsAndConditions,
       specific_requests: formState.specificRequests,
-      name: formState.name,
-      description: formState.description,
-      protected_ip: formState.protectedIP,
     }; 
 
     const client = await uploadClient('client_projects', [clientData]);
@@ -165,16 +167,70 @@ const ClientRegistrationForm = () => {
     return (
       <Tabs isFitted variant='enclosed' index={step} onChange={index => setStep(index)}>
         <TabList mb='1em'>
+          <Tab color={infoValidated ? "inherit" : "red"}>Project Info{infoValidated ? "" : " *"}</Tab>
           <Tab color={scopeValidated ? "inherit" : "red"}>Scope{scopeValidated ? "" : " *"}</Tab>
           <Tab minW={150} color={milestonesValidated ? "inherit" : "red"}>Milestones{milestonesValidated ? "" : " *"}</Tab>
           <Tab color={budgetValidated ? "inherit" : "red"}>Budget{budgetValidated ? "" : " *"}</Tab>
           <Tab>Terms And Conditions</Tab>
           <Tab>Exclusions</Tab>
-          <Tab color={infoValidated ? "inherit" : "red"}>Project Info{infoValidated ? "" : " *"}</Tab>
         </TabList>
         <TabPanels>
+            <TabPanel>
+              <FormControl>
+                <FormLabel>Project Name{' '}
+                  <Tooltip label="Provide a name for the project.">
+                    <InfoOutlineIcon mb={3} boxSize={3} />
+                  </Tooltip>
+                </FormLabel>
+                <Input
+                  name="name"
+                  value={formState.name}
+                  onChange={(e) => {
+                    handleFormChange(e);
+                    setInfoValidated(!!e.target.value);
+                  }}
+                  required
+                />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Project Description{' '}
+                <Tooltip label="Provide a brief description of the project.">
+                  <InfoOutlineIcon mb={3} boxSize={3} />
+                </Tooltip>
+              </FormLabel>
+              <Textarea
+                name="description"
+                value={formState.description}
+                onChange={(e) => {
+                  handleFormChange(e);
+                  setInfoValidated(!!e.target.value);
+                }}
+                required
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>
+                Project Type{' '}
+                <Tooltip label="Indicate whether this is an open source project or protected IP.">
+                  <InfoOutlineIcon mb={3} boxSize={3} />
+                </Tooltip>
+              </FormLabel>
+              <RadioGroup
+                name="protectedIP"
+                onChange={(value) =>
+                  setFormState((prev) => ({ ...prev, protectedIP: value === 'true' }))
+                }
+                value={String(formState.protectedIP)}
+              >
+                <Stack direction="row">
+                  <Radio value="false">Open Source</Radio>
+                  <Radio value="true">Protected IP</Radio>
+                </Stack>
+              </RadioGroup>
+            </FormControl>
+          </TabPanel>
           <TabPanel>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>Scope{' '}
                 <Tooltip label="Describe the overall project requirements and objectives.">
                   <InfoOutlineIcon mb={3} boxSize={3} />
@@ -192,7 +248,7 @@ const ClientRegistrationForm = () => {
             </FormControl>
           </TabPanel>
           <TabPanel>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>
                 Milestones{" "}
                 <Tooltip label="List the major project milestones and their expected outcomes.">
@@ -204,16 +260,16 @@ const ClientRegistrationForm = () => {
                   <Input
                     placeholder="Milestone description"
                     name="description"
-                    value={milestone.description}
+                    value={milestone.milestone}
                     onChange={(e) => {
-                      handleMilestoneChange(index, "description", e.target.value);
+                      handleMilestoneChange(index, "milestone", e.target.value);
                       setMilestonesValidated(!!e.target.value);
                     }}
                     required
                   />
                   <Input
                     type="date"
-                    name="                    targetDate"
+                    name="targetDate"
                     value={milestone.targetDate}
                     onChange={(e) => {
                       handleMilestoneChange(index, "targetDate", e.target.value);
@@ -228,7 +284,7 @@ const ClientRegistrationForm = () => {
             </FormControl>
           </TabPanel>
           <TabPanel>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>Budget{' '}
                 <Tooltip label="Provide the project's budget.">
                   <InfoOutlineIcon mb={3} boxSize={3} />
@@ -274,53 +330,6 @@ const ClientRegistrationForm = () => {
               />
             </FormControl>
             </TabPanel>
-            <TabPanel>
-              <FormControl isRequired>
-                <FormLabel>Project Name{' '}
-                  <Tooltip label="Provide a name for the project.">
-                    <InfoOutlineIcon mb={3} boxSize={3} />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  name="name"
-                  value={formState.name}
-                  onChange={(e) => {
-                    handleFormChange(e);
-                    setInfoValidated(!!e.target.value);
-                  }}
-                  required
-                />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Project Description{' '}
-                <Tooltip label="Provide a brief description of the project.">
-                  <InfoOutlineIcon mb={3} boxSize={3} />
-                </Tooltip>
-              </FormLabel>
-              <Textarea
-                name="description"
-                value={formState.description}
-                onChange={(e) => {
-                  handleFormChange(e);
-                  setInfoValidated(!!e.target.value);
-                }}
-                required
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>
-                Project Type{' '}
-                <Tooltip label="Indicate whether this is an open source project or protected IP.">
-                  <InfoOutlineIcon mb={3} boxSize={3} />
-                </Tooltip>
-              </FormLabel>
-              <Checkbox
-                name="protectedIP"
-                checked={formState.protectedIP}
-                onChange={e => setFormState(prev => ({ ...prev, protectedIP: e.target.checked }))}
-              />
-            </FormControl>
-          </TabPanel>
         </TabPanels>
       </Tabs>
     );
@@ -354,8 +363,8 @@ const ClientRegistrationForm = () => {
               Next
             </Button>
           ) : (
-            <Button type="submit" colorScheme="teal" size="lg" mt={4} isLoading={loading}>
-              Register
+            <Button type="submit" mt={4} isLoading={loading}>
+              Submit
             </Button>
           )}
         </Box>
