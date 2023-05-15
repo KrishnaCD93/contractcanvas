@@ -3,7 +3,6 @@ import { Steps } from "antd";
 
 const ProgressIndicator = ({ currentStep }: any) => {
   const [stepData, setStepData] = useState([
-    { label: "Account", summary: "" },
     { label: "Portfolio", summary: ""},
     { label: "Personal", summary: "" },
     { label: "Password", summary: ""},

@@ -1,7 +1,6 @@
 // /components/Registration/DeveloperRegistration.tsx
 import React, { ChangeEvent, useState } from 'react';
 import {
-  Box,
   Button,
   Container,
   Checkbox,
@@ -23,29 +22,86 @@ import {
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 
-interface DeveloperRegistrationProps {
+interface DeveloperRegistrationProps extends DeveloperZKP {
   forwardRef: React.RefObject<HTMLDivElement>;
   setDevInfo: (devInfo: any) => void;
-  setDevZKP: (devZKP: any) => void;
+  setDevZKP: (devZKP: DeveloperZKP) => void;
   setStep: (step: number) => void;
+  rate: string;
+}
+
+interface DeveloperFormData {
+  rate: string;
+  availability: string;
+  skills: string;
+  resume: File | null;
+  exclusions: string;
+}
+
+export interface DeveloperZKPData {
+  rate: string;
+  rateDisclosed: boolean;
+  availability: string;
+  availabilityDisclosed: boolean;
+  skills: string;
+  skillsDisclosed: boolean;
+  resumeFileName: string;
+  resumeFileNameDisclosed: boolean;
+  exclusions: string;
+  exclusionsDisclosed: boolean;
+}
+
+export interface ZKPSignal {
+  disclosedRate: BigInt;
+  disclosedAvailability: BigInt;
+  disclosedSkills: BigInt;
+  disclosedResumeFileName: BigInt;
+  disclosedExclusions: BigInt;
+  rateHash: BigInt;
+  availabilityHash: BigInt;
+  skillsHash: BigInt;
+  resumeFileNameHash: BigInt;
+  exclusionsHash: BigInt;
+}
+
+export interface SignalData {
+  disclosedRate: string;
+  disclosedAvailability: string;
+  disclosedSkills: string;
+  disclosedResumeFileName: string;
+  disclosedExclusions: string;
+  rateHash: BigInt;
+  availabilityHash: BigInt;
+  skillsHash: BigInt;
+  resumeFileNameHash: BigInt;
+  exclusionsHash: BigInt;
+}
+
+export interface DeveloperZKP {
+  proof: string;
+  signals: BigInt[];
+  isValid: boolean;
+}
+
+export interface DeveloperInfoData {
+  rate: string;
+  availability: string;
+  skills: string[];
+  resumeFileName: string;
+  exclusions: string[];
 }
 
 const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   forwardRef,
   setDevInfo,
   setDevZKP,
+  rate,
   setStep,
 }) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [devStep, setDevStep] = useState(0);
-  const [formData, setFormData] = useState<{
-    rate: string;
-    resume: File | null;
-    availability: string;
-    skills: string;
-    exclusions: string;
-  }>({
+  const [formData, setFormData] = useState<DeveloperFormData>({
     rate: '',
     resume: null,
     availability: '',
@@ -54,13 +110,27 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   });
   const [rateDisclosed, setRateDisclosed] = useState(false);
   const [resumeDisclosed, setResumeDisclosed] = useState(false);
-  const [availabilityDisclosed, setAvailabilityDisclosed] = useState(false);
-  const [skillsDisclosed, setSkillsDisclosed] = useState(false);
+  const [availabilityDisclosed, setAvailabilityDisclosed] = useState(true);
+  const [skillsDisclosed, setSkillsDisclosed] = useState(true);
   const [exclusionsDisclosed, setExclusionsDisclosed] = useState(false);
 
   const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Update handleFormChange function to set validation status
+    switch (name) {
+      case 'rate':
+        setRateValidated(!!value);
+        break;
+      case 'availability':
+        setAvailabilityValidated(!!value);
+        break;
+      case 'skills':
+        setSkillsValidated(!!value);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,8 +158,8 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
     return result;
   };
 
-  const uploadDev = async (values: any) => {
-    const response = await fetch(`/api/selective-disclodure`, {
+  const uploadDev = async (values: DeveloperZKPData) => {
+    const response = await fetch(`/api/selective-disclosure`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,9 +167,10 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
       body: JSON.stringify({ values }),
     });
 
-    const { result } = await response.json();
-    console.log('Uploaded dev data:', result);
-    return result;
+    
+    const { proof, publicSignals: signals, isValid } = await response.json();
+    console.log('Uploaded dev data:', proof, signals, isValid);
+    return { proof, signals, isValid };
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -108,6 +179,18 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
 
     setLoading(true);
 
+    if (!formData.rate || !formData.availability || !formData.skills) {
+      toast({
+        title: 'Developer registration failed.',
+        description: 'Please fill out all required fields.',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return;
+    }
+
     let uploadedResumeUrl = '';
     if (formData.resume) {
       uploadedResumeUrl = await uploadResume();
@@ -115,15 +198,10 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
 
     setDevInfo({
       rate: formData.rate,
-      rateDisclosed: rateDisclosed,
       resume_url: uploadedResumeUrl || '',
-      resumeDisclosed: resumeDisclosed,
       availability: formData.availability,
-      availabilityDisclosed: availabilityDisclosed,
       skills: formData.skills.split(',').map((skill: string) => skill.trim()),
-      skillsDisclosed: skillsDisclosed,
       exclusions: formData.exclusions.split(',').map((exclusion: string) => exclusion.trim()),
-      exclusionsDisclosed: exclusionsDisclosed,
     });
 
     const developerData = {
@@ -141,7 +219,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
 
     const dev = await uploadDev(developerData);
 
-    if (dev === '') {
+    if (dev === undefined) {
       toast({
         title: 'Developer registration failed.',
         description: 'There was an error submitting your registration.',
@@ -149,82 +227,60 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
         duration: 5000,
         isClosable: true,
       });
+      setLoading(false);
       return;
     }
 
     setDevZKP(dev);
     setDevInfo(dev);
-    // setStep(1);
-
     setLoading(false);
-
+    
     toast({
       title: 'Developer registration complete.',
       description:
-        'Your developer profile is complete. Please continue to register your portfolio items.',
+      'Your developer profile is complete. Please continue to register your portfolio items.',
       status: 'success',
       duration: 5000,
       isClosable: true,
     });
+    // setStep(1);
   };
-
-  const nextDevStep = () => setDevStep(devStep + 1);
-  const prevDevStep = () => setDevStep(devStep - 1);
 
   // Define states to track validation status
   const [rateValidated, setRateValidated] = useState(false);
-  const [resumeValidated, setResumeValidated] = useState(true); // this is not required
   const [availabilityValidated, setAvailabilityValidated] = useState(false);
   const [skillsValidated, setSkillsValidated] = useState(false);
-  const [exclusionsValidated, setExclusionsValidated] = useState(true); // this is not required
 
   const renderStepContent = () => {
-    // Update handleFormChange function to set validation status
-    const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
-      // existing code...
-      const { name, value } = e.target;
-      switch (name) {
-        case 'rate':
-          setRateValidated(!!value);
-          break;
-        case 'availability':
-          setAvailabilityValidated(!!value);
-          break;
-        case 'skills':
-          setSkillsValidated(!!value);
-          break;
-        default:
-          break;
-      }
-    };
-
     return (
       <Tabs isFitted variant='enclosed' index={devStep} onChange={index => setDevStep(index)}>
         <TabList mb='1em'>
-          <Tab minW={150} color={rateValidated ? "inherit" : "red"}>Rate {rateValidated ? "" : "*"}</Tab>
-          <Tab minW={150} color={resumeValidated ? "inherit" : "red"}>Resume</Tab>
-          <Tab minW={150} color={availabilityValidated ? "inherit" : "red"}>Availability {availabilityValidated ? "" : "*"}</Tab>
-          <Tab minW={150} color={skillsValidated ? "inherit" : "red"}>Skills {skillsValidated ? "" : "*"}</Tab>
-          <Tab minW={150} color={exclusionsValidated ? "inherit" : "red"}>Exclusions</Tab>
+          <Tab minW={150} color={devStep > 0 && rateValidated ? "inherit" : "red"}>Rate{rateValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={devStep > 1 && availabilityValidated ? "inherit" : "red"}>Availability{availabilityValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={devStep > 2 && skillsValidated ? "inherit" : "red"}>Skills{skillsValidated ? "" : " *"}</Tab>
+          <Tab minW={150}>Resume</Tab>
+          <Tab minW={150}>Exclusions</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>
-                Rate{' '}
+                {`Rate ($/hr)`}{' '}
                 <Tooltip label="Your hourly rate is important for matching you with projects that fit your desired compensation.">
                   <InfoOutlineIcon mb={3} boxSize={3} />
                 </Tooltip>
               </FormLabel>
               <Input
-                type="text"
+                type="number"
                 name="rate"
+                placeholder='60.00'
+                defaultValue={rate}
                 value={formData.rate}
                 onChange={handleFormChange}
-                required
               />
               <FormHelperText>Enter your hourly rate in USD.</FormHelperText>
               <Checkbox
+                name='rateDisclosed'
                 value="rateDisclosed"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   event.stopPropagation()
@@ -244,33 +300,6 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
           <TabPanel>
             <FormControl>
               <FormLabel>
-                Resume{' '}
-                <Tooltip label="Upload your resume to showcase your experience and skills to potential clients">
-                  <InfoOutlineIcon mb={3} boxSize={3} />
-                </Tooltip>
-              </FormLabel>
-              <Input type="file" name="resume" onChange={handleFileChange} />
-              <FormHelperText>Upload your resume in PDF format.</FormHelperText>
-              <Checkbox
-                value="resumeDisclosed"
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  event.stopPropagation()
-                  setResumeDisclosed(!resumeDisclosed)
-                }}
-                mt={2}
-              >
-                {`Disclose your resume to potential matched clients`}
-              </Checkbox>
-              <Tooltip label="Checked content will be shared to potential clients upon bid submission.
-                When left unchecked, undisclosed data will only be used to create a match rating and will be hashed for your privacy."
-              >
-                <InfoOutlineIcon ml={1} mb={1} boxSize={3} />
-              </Tooltip>
-            </FormControl>
-          </TabPanel>
-          <TabPanel>
-            <FormControl isRequired>
-              <FormLabel>
                 Availability{' '}
                 <Tooltip label="Your availability helps clients understand when you can work on their projects.">
                   <InfoOutlineIcon mb={3} boxSize={3} />
@@ -279,30 +308,32 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
               <Input
                 type="text"
                 name="availability"
+                placeholder="Nights and weekends"
                 value={formData.availability}
                 onChange={handleFormChange}
-                required
-              />
+                />
               <FormHelperText>Enter your weekly availability in hours.</FormHelperText>
               <Checkbox
+                name='availabilityDisclosed'
                 value="availabilityDisclosed"
+                defaultChecked={availabilityDisclosed}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   event.stopPropagation()
                   setAvailabilityDisclosed(!availabilityDisclosed)
                 }}
                 mt={2}
-              >
+                >
                 {`Disclose your availability to potential matched clients`}
               </Checkbox>
               <Tooltip label="Checked content will be shared to potential clients upon bid submission.
                 When left unchecked, undisclosed data will only be used to create a match rating and will be hashed for your privacy."
-              >
+                >
                 <InfoOutlineIcon ml={1} mb={1} boxSize={3} />
               </Tooltip>
             </FormControl>
           </TabPanel>
           <TabPanel>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>
                 Skills{' '}
                 <Tooltip label="Listing your skills helps clients find developers with the expertise they need for their projects.">
@@ -311,20 +342,50 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
               </FormLabel>
               <Textarea
                 name="skills"
+                placeholder="web development, graphic design, project management"
                 value={formData.skills}
                 onChange={handleFormChange}
-                required
-              />
+                />
               <FormHelperText>List your skills separated by commas.</FormHelperText>
               <Checkbox
+                name='skillsDisclosed'
                 value="skillsDisclosed"
+                defaultChecked={skillsDisclosed}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   event.stopPropagation()
                   setSkillsDisclosed(!skillsDisclosed)
                 }}
                 mt={2}
-              >
+                >
                 {`Disclose your skills to potential matched clients`}
+              </Checkbox>
+              <Tooltip label="Checked content will be shared to potential clients upon bid submission.
+                When left unchecked, undisclosed data will only be used to create a match rating and will be hashed for your privacy."
+                >
+                <InfoOutlineIcon ml={1} mb={1} boxSize={3} />
+              </Tooltip>
+            </FormControl>
+          </TabPanel>
+          <TabPanel>
+            <FormControl>
+              <FormLabel>
+                Resume{' '}
+                <Tooltip label="Upload your resume to showcase your experience and skills to potential clients">
+                  <InfoOutlineIcon mb={3} boxSize={3} />
+                </Tooltip>
+              </FormLabel>
+              <Input type="file" name="resume" onChange={handleFileChange} />
+              <FormHelperText>Upload your resume in PDF format.</FormHelperText>
+              <Checkbox
+                name='resumeDisclosed'
+                value="resumeDisclosed"
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  event.stopPropagation()
+                  setResumeDisclosed(!resumeDisclosed)
+                }}
+                mt={2}
+              >
+                {`Disclose your resume to potential matched clients`}
               </Checkbox>
               <Tooltip label="Checked content will be shared to potential clients upon bid submission.
                 When left unchecked, undisclosed data will only be used to create a match rating and will be hashed for your privacy."
@@ -343,11 +404,13 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
               </FormLabel>
               <Textarea
                 name="exclusions"
+                placeholder="remote work, office work, full-time work"
                 value={formData.exclusions}
                 onChange={handleFormChange}
               />
               <FormHelperText>List any project types or industries you prefer not to work in.</FormHelperText>
               <Checkbox
+                name='exclusionsDisclosed'
                 value="exclusionsDisclosed"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   event.stopPropagation()

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,6 +11,8 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
+import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../components/Registration/DeveloperRegistration';
+import DevData from '@/components/ViewZKP';
 
 const BidPage = () => {
   const [maxBudget, setMaxBudget] = useState('3');
@@ -19,8 +21,22 @@ const BidPage = () => {
   const [signals, setSignals] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [devInfo, setDevInfo] = useState<DeveloperInfoData>({
+    rate: '',
+    availability: '',
+    skills: [],
+    resumeFileName: '',
+    exclusions: [],
+  });
+  const [devZKP, setDevZKP] = useState<DeveloperZKP>({
+    proof: '',
+    signals: [],
+    isValid: false,
+  });
+  const [step, setStep] = useState(1);
 
   const toast = useToast();
+  const devRef = useRef<HTMLDivElement>(null);
 
   const runProofs = async () => {
     if (maxBudget.length === 0 || acceptedPrice.length === 0) return;
@@ -34,11 +50,56 @@ const BidPage = () => {
     });
     const { proof: _proof, publicSignals: _signals, isValid: _isValid } = await response.json();
 
-    setProof(JSON.stringify(_proof, null, 2));
-    setSignals(JSON.stringify(_signals, null, 2));
+    setProof(_proof);
+    setSignals(_signals);
     setIsValid(_isValid);
 
     setLoading(false);
+  };
+
+  useEffect(() => {
+    if (signals[0] === '1') {
+      devRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [signals]);
+
+  const submitBid = async () => {
+    if (!devZKP.isValid) {
+      toast({
+        title: 'Invalid ZKP',
+        description: 'Please make sure your ZKP is valid before submitting your bid.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const response = await fetch('/api/redis-storage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proof, signals }),
+    })
+    const { error } = await response.json();
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'There was an error submitting your bid. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: 'Your bid has been submitted.',
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    });
   };
 
   const changeMaxBudget = (e: { target: { value: React.SetStateAction<string> } }) => setMaxBudget(e.target.value);
@@ -75,6 +136,17 @@ const BidPage = () => {
             <strong>Public Signals:</strong>
           </Text>
           <Textarea value={signals} readOnly />
+          {signals[0] === '1' && 
+            <DeveloperRegistrationForm
+              forwardRef={devRef}
+              setDevInfo={setDevInfo}
+              setDevZKP={setDevZKP}
+              setStep={setStep} 
+              rate={acceptedPrice}
+              proof={''} signals={[]} isValid={false} 
+            />
+            }
+            {devZKP && <DevData devZKP={devZKP} title="Developer ZKP" />}
         </Box>
       )}
     </Box>

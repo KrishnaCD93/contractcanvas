@@ -1,7 +1,5 @@
 // /pages/register.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import ClientProjectForm from '../components/Registration/ClientRegistration';
-import DeveloperRegistrationForm from '../components/Registration/DeveloperRegistration';
 import PortfolioRegistrationForm from '../components/Registration/PortfolioRegistration';
 import PersonalInfoForm from '../components/Registration/PersonalInfoRegistration';
 import { useRouter } from 'next/router';
@@ -10,16 +8,13 @@ import { Database } from '../../types_db';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import PasswordRegistration from '@/components/Registration/PasswordRegistration';
 import ProgressIndicator from '@/components/Registration/ProgressIndicator';
-import DevDrawer from '@/components/Drawer';
+import DevData from '@/components/ViewZKP';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [devInfo, setDevInfo] = useState<any>({});
-  const [devZKP, setDevZKP] = useState<any>({});
   const [portfolioIds, setPortfolioIds] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>({});
   
-  const devRef = useRef<HTMLDivElement>(null);
   const portfolioRef = useRef<HTMLDivElement>(null);
   const personalRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLDivElement>(null);
@@ -30,12 +25,10 @@ const Register: React.FC = () => {
 
   useEffect(() => {
     if (step === 0) {
-      devRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else if (step === 1) {
       portfolioRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else if (step === 2) {
+    } else if (step === 1) {
       personalRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else if (step === 3) {
+    } else if (step === 2) {
       passwordRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [step]);
@@ -91,22 +84,13 @@ const Register: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <DeveloperRegistrationForm
-            forwardRef={devRef}
-            setDevInfo={setDevInfo}
-            setDevZKP={setDevZKP}
-            setStep={setStep}
-          />
-        );
-      case 1:
-        return (
           <PortfolioRegistrationForm
             forwardRef={portfolioRef}
             setPortfolioIds={setPortfolioIds}
             setStep={setStep}
           />
         );
-      case 2:
+      case 1:
         return (
           <PersonalInfoForm
             forwardRef={personalRef}
@@ -114,7 +98,7 @@ const Register: React.FC = () => {
             setStep={setStep}
           />
         );
-      case 3:
+      case 2:
         return (
           <PasswordRegistration
             forwardRef={passwordRef}
@@ -129,13 +113,11 @@ const Register: React.FC = () => {
     }
   };
 
-
   return (
     <Container maxW="container.lg">
       <VStack spacing={8} width="100%" py={12}>
         <ProgressIndicator step={step} />
         {renderForm()}
-        <DevDrawer devZKP={devZKP} title="Developer ZKP" />
       </VStack>
     </Container>
   );
