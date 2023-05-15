@@ -15,8 +15,8 @@ import {
   MenuDivider,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'; // Import useSupabaseClient
-import { Database } from '@/../types_db'; // Adjust the import path accordingly
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { Database } from '@/../types_db';
 import { useCallback, useEffect, useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
@@ -27,7 +27,6 @@ export const Navbar = () => {
   const user = useUser();
   const router = useRouter();
 
-  // Use the useSupabaseClient hook to access the Supabase client
   const supabaseClient = useSupabaseClient<Database>();
 
   const fetchData = useCallback( async function fetchUserData(userId: string) {
@@ -75,6 +74,9 @@ export const Navbar = () => {
             </Link>
             <Link href="/projects" color="white">
               Projects
+            </Link>
+            <Link href="/about" color="white">
+              About
             </Link>
             {user ? (
               <>
