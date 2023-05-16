@@ -18,7 +18,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('/api/supabase-fetch?database=client_projects', {
+      const response = await fetch('/api/supabase-fetch?database=projects', {
         method: 'GET',
       });
   
@@ -76,16 +76,18 @@ const Projects = () => {
   }
   
   return (
-    <Box>
-      <Heading as="h1" size="2xl" textAlign="center" mb={6}>
-        Projects
-      </Heading>
-      <SimpleGrid columns={[1, null, 2]} spacing={10}>
-        {projects.map((project) => (
-          <ProjectCard key={project.id} {...project} onDelete={handleDelete} />
-        ))}
-      </SimpleGrid>
-    </Box>
+    <Container maxW="container.xl">
+      <Box as="section" pt={20} pb={32}>
+        <Heading as="h1" size="2xl" textAlign="center" mb={6}>
+          Projects
+        </Heading>
+        <SimpleGrid columns={[1, null, 2]} spacing={10}>
+          {projects.map((project) => (
+            <ProjectCard key={project.id} {...project} onDelete={handleDelete} />
+          ))}
+        </SimpleGrid>
+      </Box>
+    </Container>
   );
 };  
 
