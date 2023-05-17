@@ -39,7 +39,7 @@ export default function HomePage() {
               color="brand.space-cadet"
               mt={2}
             >
-              Build with people you trust while protecting your privacy.
+              Freelance with trust while protecting privacy
             </Text>
           </Box>
           <Flex mt='10px' justifyContent="center">

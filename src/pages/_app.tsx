@@ -13,9 +13,6 @@ import * as gtag from "../lib/gtag"
 
 const theme = extendTheme({
   colors: {
-    customOrange: {
-      500: "#FFA500",
-    },
     brand: {
       "white-2": "#FFFFFFff",
       "white": "#FDFDFEff",

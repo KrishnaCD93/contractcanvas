@@ -95,7 +95,7 @@ export const Navbar = () => {
           <DrawerOverlay>
           <DrawerContent>
               <DrawerCloseButton />
-              <DrawerHeader borderBottomWidth="1px">
+              <DrawerHeader color="brand.delft-blue" borderBottomWidth="1px">
                 ContractCanvas
               </DrawerHeader>
               <DrawerBody>
