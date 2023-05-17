@@ -2,24 +2,26 @@
 import React, { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import PortfolioRegistrationForm from '../components/Registration/PortfolioRegistration';
 import PersonalInfoForm from '../components/Registration/PersonalInfoRegistration';
-import { useRouter } from 'next/router';
-import { Container, VStack, useToast } from '@chakra-ui/react';
+import { Container, Divider, Text, VStack, useToast } from '@chakra-ui/react';
 import { Database } from '../../types_db';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import PasswordRegistration from '@/components/Registration/PasswordRegistration';
 import ProgressIndicator from '@/components/Registration/ProgressIndicator';
+import Link from 'next/link';
+import { PrimaryButton } from '@/components/Buttons';
+import RegistrationContainer from '@/components/Registration/RegistrationContainer';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(0);
   const [portfolioIds, setPortfolioIds] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>({});
-  
+  const [progressPercent, setProgressPercent] = useState(10);
+
   const portfolioRef = useRef<HTMLDivElement>(null);
   const personalRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLDivElement>(null);
   
   const toast = useToast();
-  const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
 
   useEffect(() => {
@@ -31,11 +33,13 @@ const Register: React.FC = () => {
       passwordRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [step]);
-  
-  const handleSignUp = useCallback(async () => {
+
+  const handleSignUp = async () => {
     const portfolioIdsToInsert = portfolioIds.map((id) => ({
-      portfolio_id: id,
+      id,
     }));
+    console.log('portfolioIdsToInsert', portfolioIdsToInsert)
+    console.log('userData', userData)
     const { error } = await supabaseClient.auth.signUp({
       email: userData.email,
       password: userData.password,
@@ -64,19 +68,10 @@ const Register: React.FC = () => {
         duration: 5000,
         isClosable: true,
       });
-      router.push('/projects');
+      setProgressPercent(100);
+      setStep(3);
     }
-  }, [portfolioIds, userData, supabaseClient, toast, router]);
-
-  useEffect(() => {
-    if (
-      portfolioIds.length > 0 &&
-      Object.keys(userData).length > 0 &&
-      step === 4
-    ) {
-      handleSignUp();
-    }
-  }, [portfolioIds, step, userData, handleSignUp]);
+  }
 
   const renderForm = () => {
     switch (step) {
@@ -85,7 +80,9 @@ const Register: React.FC = () => {
           <PersonalInfoForm
             forwardRef={personalRef}
             setUserData={setUserData}
+            step={step}
             setStep={setStep}
+            setProgressPercent={setProgressPercent}
           />
         );
       case 1:
@@ -93,7 +90,9 @@ const Register: React.FC = () => {
           <PortfolioRegistrationForm
             forwardRef={portfolioRef}
             setPortfolioIds={setPortfolioIds}
+            step={step}
             setStep={setStep}
+            setProgressPercent={setProgressPercent}
           />
         );
       case 2:
@@ -102,9 +101,27 @@ const Register: React.FC = () => {
             forwardRef={passwordRef}
             userData={userData}
             setUserData={setUserData}
-            setStep={setStep}
             handleSignUp={handleSignUp}
           />
+        );
+      case 3:
+        return (
+          <RegistrationContainer
+            title="Registration successful"
+            description='Please check your email to verify your account.'
+            forwardRef={null}
+          >
+            <Divider my={4} />
+            <Text mb={4}>
+              Thank you for registering!
+              <br />
+              You can now go ahead and check out some projects to place your bids or create your own project.
+            </Text>
+            <PrimaryButton
+              text="Go to projects"
+              route='/projects'
+            />
+          </RegistrationContainer>
         );
       default:
         return null;
@@ -113,10 +130,14 @@ const Register: React.FC = () => {
 
   return (
     <Container maxW="container.lg">
-      <VStack spacing={8} width="100%" py={12}>
-        <ProgressIndicator currentStep={step} setStep={setStep} />
+      <VStack spacing={8} width="100%" py={6}>
+        <ProgressIndicator currentStep={step} setStep={setStep} progressPercent={progressPercent} setProgressPercent={setProgressPercent} />
         {renderForm()}
       </VStack>
+      {step < 3 && <Text fontSize="sm" textAlign="center">
+        Already have an account?{' '}
+        <Link href="/login"><Text as="u" color="blue.500">Login</Text></Link>
+      </Text>}
     </Container>
   );
 };

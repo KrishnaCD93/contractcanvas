@@ -4,15 +4,15 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '../../../types_db';
 
 // Function to process POST requests
-async function processPost(database: string, values: any[], supabase: any): Promise<string> {
+async function processPost(database: string, values: any[], supabase: any): Promise<string[]> {
   const { data, error } = await supabase.from(database).insert(values).select();
 
   if (error) {
     console.error('Error while uploading value:', error);
-    return '';
+    return [''];
   }
-
-  return data && data.length > 0 ? data[0].id : '';
+  console.log('Data:', data);
+  return data ? data.map((item: any) => item.id) : [''];
 }
 
 // Function to process GET requests

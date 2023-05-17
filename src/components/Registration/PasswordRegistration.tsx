@@ -15,7 +15,6 @@ interface PasswordRegistrationProps {
   forwardRef: React.RefObject<HTMLDivElement>;
   userData: any;
   setUserData: (data: any) => void;
-  setStep: (step: number) => void;
   handleSignUp: () => void;
 }
 
@@ -23,7 +22,6 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
   forwardRef,
   userData,
   setUserData,
-  setStep,
   handleSignUp,
 }) => {
   const [password, setPassword] = useState('');
@@ -51,8 +49,8 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
       return;
     }
 
-    setUserData({ ...userData, password });
-    setStep(4);
+    setUserData((prevUserData: any) => ({ ...prevUserData, password: password }));
+
     handleSignUp();
   };
 
@@ -80,15 +78,14 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
     >
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
-          <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              name="password"
-              value={password}
-              onChange={handlePasswordChange}
-              required
-            />
+        <FormControl isRequired>
+          <FormLabel>Password</FormLabel>
+          <Input
+            type="password"
+            name="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
           </FormControl>
           <Progress
             value={passwordStrength * 25}
@@ -103,7 +100,6 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
               name="passwordConfirm"
               value={passwordConfirm}
               onChange={handlePasswordConfirmChange}
-              required
             />
           </FormControl>
           {!passwordsMatch && (

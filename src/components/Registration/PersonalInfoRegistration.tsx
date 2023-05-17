@@ -13,10 +13,18 @@ import RegistrationContainer from "./RegistrationContainer";
 interface PersonalInfoRegistrationProps {
 forwardRef: React.RefObject<HTMLDivElement>;
 setUserData: (data: any) => void;
+step: number;
 setStep: (step: number) => void;
+setProgressPercent: (percent: number) => void;
 }
 
-const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ forwardRef, setUserData, setStep }) => {
+const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ 
+  forwardRef, 
+  setUserData, 
+  step, 
+  setStep,
+  setProgressPercent,
+}) => {
   const [formData, setFormData] = React.useState({
     firstName: "",
     lastName: "",
@@ -34,8 +42,9 @@ const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ for
     e.preventDefault();
     
     setUserData({ ...formData });
-
-    setStep(3);
+    
+    setProgressPercent(33);
+    setStep(step + 1);
   };
 
   return (
@@ -84,7 +93,14 @@ const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ for
               onChange={handleFormChange}
             />
           </FormControl>
-          <Button type="submit">Update Personal Info</Button>
+          <Button
+          size="lg"
+          bg="brand.mint-green"
+          color="brand.space-cadet"
+          type="submit"
+        >
+          Next
+        </Button>
         </VStack>
       </form>
     </RegistrationContainer>

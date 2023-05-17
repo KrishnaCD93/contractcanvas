@@ -12,7 +12,8 @@ import {
   EditableInput,
   EditablePreview,
   IconButton,
-  Icon
+  Icon,
+  SimpleGrid
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import RegistrationContainer from "./RegistrationContainer";
@@ -27,13 +28,17 @@ interface PortfolioItem {
 interface PortfolioRegistrationFormProps {
   forwardRef: React.Ref<HTMLDivElement>;
   setPortfolioIds: (ids: string[]) => void;
+  step: number;
   setStep: (step: number) => void;
+  setProgressPercent: (percent: number) => void;
 }
 
 const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
   forwardRef,
   setPortfolioIds,
+  step,
   setStep,
+  setProgressPercent,
 }) => {
   const [formData, setFormData] = useState({
     title: "",
@@ -98,8 +103,28 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
 
   const handleSubmit = async () => {
     if (portfolioItems.length === 0 && (!formData.title || !formData.link)) return;
-    const uploadedIds = await uploadPortfolioItems('portfolio_items', portfolioItems);
-    setPortfolioIds(uploadedIds);
+    const portfolioItemsToUpload: any[] = [];
+    portfolioItems.forEach((item) => {
+      portfolioItemsToUpload.push({
+        title: item.title,
+        link: item.link,
+        description: item.description,
+      });
+    });
+    if (portfolioItemsToUpload.length > 0) {
+      const uploadedIds: any[] = await uploadPortfolioItems('portfolio_items', portfolioItemsToUpload);
+      if (uploadedIds && uploadedIds.length === 0) {
+        toast({
+          title: "Error upload portfolio items.",
+          description: "We encountered an error and your portfolio items were not updated. Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      };
+      setPortfolioIds(uploadedIds);
+    }
     toast({
       title: "Portfolio items updated.",
       description: "Your portfolio items were updated successfully.",
@@ -107,7 +132,8 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
       duration: 5000,
       isClosable: true,
     });
-    setStep(2);
+    setProgressPercent(66);
+    setStep(step + 1);
   };
 
   return (
@@ -161,43 +187,40 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
         </VStack>
       </form>
       <VStack spacing={4} mt={4}>
-        {portfolioItems.map((item) => (
-          <Box key={item.id} width="100%">
-            <Editable
-              defaultValue={item.title}
-              onSubmit={(value) => handleUpdate(item.id, "title", value)}
-            >
-              <EditablePreview />
-              <EditableInput />
+        <SimpleGrid columns={3} spacing={4} width="100%">
+          {portfolioItems.map((item) => (
+            <Box key={item.id} width="100%" borderWidth={1} borderColor="brand.light-cyan" p={2}>
+              <Editable
+                defaultValue={item.title}
+                onSubmit={(value) => handleUpdate(item.id, "title", value)}
+              >
+                <EditablePreview />
+                <EditableInput />
+              </Editable>
+              <Editable
+                defaultValue={item.link}
+                onSubmit={(value) => handleUpdate(item.id, "link", value)}
+              >
+                <EditablePreview />
+                <EditableInput />
+              </Editable>
+              <Editable
+                defaultValue={item.description}
+                onSubmit={(value) => handleUpdate(item.id, "description", value)}
+              >
+                <EditablePreview />
+                <EditableInput />
+              </Editable>
               <IconButton
-                aria-label="Edit title"
-                icon={<EditIcon />}
+                aria-label="Delete portfolio item"
+                icon={<CloseIcon />}
                 size="sm"
-                onClick={()=> {}} 
+                onClick={() => handleDelete(item.id)}
+                colorScheme="red"
               />
-            </Editable>
-            <Editable
-              defaultValue={item.link}
-              onSubmit={(value) => handleUpdate(item.id, "link", value)}
-            >
-              <EditablePreview />
-              <EditableInput />
-              <IconButton
-                aria-label="Edit link"
-                icon={<EditIcon />}
-                size="sm"
-                onClick={() => {}}
-              />
-            </Editable>
-            <IconButton
-              aria-label="Delete portfolio item"
-              icon={<CloseIcon />}
-              size="sm"
-              onClick={() => handleDelete(item.id)}
-              colorScheme="red"
-            />
-          </Box>
-        ))}
+            </Box>
+          ))}
+        </SimpleGrid>
         <Button
           size="lg"
           bg="brand.mint-green"
