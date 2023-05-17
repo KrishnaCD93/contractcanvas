@@ -94,13 +94,13 @@ const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({
             />
           </FormControl>
           <Button
-          size="lg"
-          bg="brand.mint-green"
-          color="brand.space-cadet"
-          type="submit"
-        >
-          Next
-        </Button>
+            size="lg"
+            bg="brand.mint-green"
+            color="brand.space-cadet"
+            type="submit"
+          >
+            Next
+          </Button>
         </VStack>
       </form>
     </RegistrationContainer>

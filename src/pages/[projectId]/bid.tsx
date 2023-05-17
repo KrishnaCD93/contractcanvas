@@ -12,7 +12,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../../components/Registration/DeveloperRegistration';
+import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../../components/Registration/BidRegistration';
 import DevData from '@/components/ViewZKP';
 import { useRouter } from 'next/router';
 

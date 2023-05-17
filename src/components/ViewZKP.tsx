@@ -1,6 +1,6 @@
 import { Button, Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, useDisclosure } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { DeveloperZKP, SignalData, ZKPSignal } from "./Registration/DeveloperRegistration";
+import { DeveloperZKP, SignalData, ZKPSignal } from "./Registration/BidRegistration";
 
 const DevData: React.FC<{ devZKP: DeveloperZKP, title: string }> = ({ devZKP, title }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();

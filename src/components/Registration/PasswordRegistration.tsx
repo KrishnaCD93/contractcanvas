@@ -14,14 +14,12 @@ import RegistrationContainer from './RegistrationContainer';
 interface PasswordRegistrationProps {
   forwardRef: React.RefObject<HTMLDivElement>;
   userData: any;
-  setUserData: (data: any) => void;
   handleSignUp: () => void;
 }
 
 const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
   forwardRef,
   userData,
-  setUserData,
   handleSignUp,
 }) => {
   const [password, setPassword] = useState('');
@@ -49,7 +47,7 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
       return;
     }
 
-    setUserData((prevUserData: any) => ({ ...prevUserData, password: password }));
+    userData.password = password;
 
     handleSignUp();
   };
@@ -105,8 +103,13 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
           {!passwordsMatch && (
             <Text color="red.500">Passwords do not match</Text>
           )}
-          <Button type="submit" isDisabled={!passwordsMatch}>
-            Add Password and Register
+          <Button
+            size="lg"
+            bg="brand.mint-green"
+            color="brand.space-cadet"
+            type="submit"
+            isDisabled={!passwordsMatch}>
+            Register
           </Button>
         </VStack>
       </form>

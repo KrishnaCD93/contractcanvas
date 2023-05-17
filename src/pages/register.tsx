@@ -100,7 +100,6 @@ const Register: React.FC = () => {
           <PasswordRegistration
             forwardRef={passwordRef}
             userData={userData}
-            setUserData={setUserData}
             handleSignUp={handleSignUp}
           />
         );

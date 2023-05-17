@@ -10,9 +10,7 @@ import {
   Textarea,
   Radio,
   RadioGroup,
-  Heading,
   useToast,
-  Text,
   Tooltip,
   HStack,
   Tabs,
@@ -20,7 +18,6 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Container,
   Stack,
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
@@ -124,7 +121,7 @@ const ClientRegistrationForm = () => {
     }
 
 
-    const clientData = {
+    const projectData = {
       name: formState.name,
       description: formState.description,
       protected_ip: formState.protectedIP,
@@ -135,11 +132,11 @@ const ClientRegistrationForm = () => {
       specific_requests: formState.specificRequests,
     }; 
 
-    const client = await uploadClient('client_projects', [clientData]);
+    const client = await uploadClient('projects', [projectData]);
   
     if (client === '') {
       toast({
-        title: 'Client registration failed.',
+        title: 'Project registration failed.',
         description: 'There was an error submitting your registration.',
         status: 'error',
         duration: 5000,
@@ -148,7 +145,7 @@ const ClientRegistrationForm = () => {
       return;
     }
     
-    console.log('Client return', client);
+    console.log('Project return', client);
     toast({
       title: 'Client registration complete.',
       description: 'Your registration has been submitted. Please continue to add your email and portfolio items.',
@@ -161,19 +158,19 @@ const ClientRegistrationForm = () => {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const [scopeValidated, setScopeValidated] = useState(false);
-  const [milestonesValidated, setMilestonesValidated] = useState(false);
-  const [budgetValidated, setBudgetValidated] = useState(false);
-  const [infoValidated, setInfoValidated] = useState(true);
+  const [scopeValidated, setScopeValidated] = useState<boolean>();
+  const [milestonesValidated, setMilestonesValidated] = useState<boolean>();
+  const [budgetValidated, setBudgetValidated] = useState<boolean>();
+  const [infoValidated, setInfoValidated] = useState<boolean>();
   
   const renderStepContent = () => {
     return (
       <Tabs isFitted variant='enclosed' index={step} onChange={index => setStep(index)}>
         <TabList mb='1em'>
-          <Tab color={infoValidated ? "inherit" : "red"}>Project Info{infoValidated ? "" : " *"}</Tab>
-          <Tab color={scopeValidated ? "inherit" : "red"}>Scope{scopeValidated ? "" : " *"}</Tab>
-          <Tab minW={150} color={milestonesValidated ? "inherit" : "red"}>Milestones{milestonesValidated ? "" : " *"}</Tab>
-          <Tab color={budgetValidated ? "inherit" : "red"}>Budget{budgetValidated ? "" : " *"}</Tab>
+          <Tab color={infoValidated === undefined || infoValidated === true ? "inherit" : "red"}>Project Info{infoValidated ? "" : " *"}</Tab>
+          <Tab color={scopeValidated === undefined || scopeValidated === true ? "inherit" : "red"}>Scope{scopeValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={milestonesValidated === undefined || milestonesValidated === true ? "inherit" : "red"}>Milestones{milestonesValidated ? "" : " *"}</Tab>
+          <Tab color={budgetValidated === undefined || budgetValidated === true ? "inherit" : "red"}>Budget{budgetValidated ? "" : " *"}</Tab>
           <Tab>Terms And Conditions</Tab>
           <Tab>Exclusions</Tab>
         </TabList>
