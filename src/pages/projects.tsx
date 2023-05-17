@@ -78,11 +78,11 @@ const Projects = () => {
   
   return (
     <Container maxW="container.xl">
-      <Box as="section" pt={20} pb={32}>
+      <Box as="section" pt={20} pb={32} textAlign='center'>
         <Heading as="h1" size="2xl" textAlign="center" mb={6}>
           Projects
         </Heading>
-        <PrimaryButton route="/contract-registration" text="Create New Project" />
+        <PrimaryButton route="/project-registration" text="Create New Project" />
         <SimpleGrid columns={[1, null, 2]} spacing={10}>
           {projects.map((project) => (
             <ProjectCard key={project.id} {...project} onDelete={handleDelete} />

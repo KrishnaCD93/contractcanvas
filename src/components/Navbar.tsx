@@ -122,8 +122,8 @@ export const Navbar = () => {
                           )}
                         </MenuButton>
                         <MenuList>
-                          <MenuItem onClick={() => router.push('/contract-registration')}>
-                            New Contract
+                          <MenuItem onClick={() => router.push('/project-registration')}>
+                            New Project
                           </MenuItem>
                           <MenuDivider />
                           <MenuItem onClick={() => router.push('/profile')}>
