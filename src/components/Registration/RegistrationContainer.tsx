@@ -19,10 +19,10 @@ const RegistrationContainer: React.FC<RegistrationContainerProps> = ({ children,
         borderColor="brand.light-cyan"
         ref={props.forwardRef}
       >
-        <Heading size="lg" mb={4}>
+        <Heading color="brand.delft-blue" size="lg">
           {props.title}
         </Heading>
-        <Text size="lg">
+        <Text size="lg" mb={4}>
           {props.description}
         </Text>
         {children}

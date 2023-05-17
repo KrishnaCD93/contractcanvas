@@ -79,7 +79,7 @@ const Projects = () => {
   return (
     <Container maxW="container.xl">
       <Box as="section" pt={20} pb={32} textAlign='center'>
-        <Heading as="h1" size="2xl" textAlign="center" mb={6}>
+        <Heading as="h1" color="brand.delft-blue" textAlign="center" mb={6}>
           Projects
         </Heading>
         <PrimaryButton route="/project-registration" text="Create New Project" />

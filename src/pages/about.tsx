@@ -6,14 +6,14 @@ const mermaidCode = `![](https://mermaid.ink/img/pako:eNqlVduO2jAQ_ZVRHlZdLUTcsq
 const About = () => {
   return (
     <Container maxW="container.xl">
-      <Box as="section" pt={20} pb={32}>
+      <Box as="section" pt={10} pb={32}>
         <VStack
           alignItems="center"
           justifyContent="center"
           spacing={4}
           mt={16}
         >
-          <Text fontSize="2xl" fontWeight="bold">
+          <Text fontSize="2xl" color="brand.delft-blue" fontWeight="bold">
             Secure your projects with Zero-Knowledge Proofs
           </Text>
           <Text fontSize="lg" textAlign="center">
@@ -23,7 +23,7 @@ const About = () => {
           </Text>
           <Center>
             <VStack>
-              <Text fontSize="xl" fontWeight="bold">How it works:</Text>
+              <Text fontSize="xl" color="brand.delft-blue" fontWeight="bold">How it works:</Text>
               <ReactMarkdown>{mermaidCode}</ReactMarkdown>
             </VStack>
           </Center>

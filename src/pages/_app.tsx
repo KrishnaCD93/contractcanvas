@@ -1,6 +1,6 @@
 // pages/_app.tsx
 import * as React from 'react';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { Box, ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { useState } from 'react'
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
@@ -17,15 +17,17 @@ const theme = extendTheme({
       500: "#FFA500",
     },
     brand: {
-      "cool-gray": "#7D859B",
-      "space-cadet": "#262E57",
+      "white-2": "#FFFFFFff",
+      "white": "#FDFDFEff",
       "light-cyan": "#DAF2F7",
+      "light-cyan-2": "#D7F3FD",
       "light-blue": "#AECCCF",
       "mint-green": "#D1F8F3",
-      "delft-blue": "#373F62",
       "celeste": "#B6E7E0",
-      "light-cyan-2": "#D7F3FD",
       "misty-rose": "#FDE5DE",
+      "cool-gray": "#7D859B",
+      "space-cadet": "#262E57",
+      "delft-blue": "#373F62",
     },
   },
 });
@@ -33,18 +35,18 @@ const theme = extendTheme({
 function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient())
   const router = useRouter();
- 
-  useEffect(() => {
-    const handleRouteChange = (url: any) => {
-      gtag.pageview(url);
-    };
- 
-    router.events.on("routeChangeComplete", handleRouteChange);
- 
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router.events]);
+
+  useEffect(() => {
+    const handleRouteChange = (url: any) => {
+      gtag.pageview(url);
+    };
+    
+    router.events.on("routeChangeComplete", handleRouteChange);
+    
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [router.events]);
   
   return (
     <>
@@ -65,8 +67,10 @@ function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) 
       />
       <ChakraProvider theme={theme}>
         <SessionContextProvider supabaseClient={supabaseClient} initialSession={pageProps.initialSession}>
-          <Navbar />
-          <Component {...pageProps} />
+          <Box bg="brand.white" minH="100vh" pb={8}>
+            <Navbar />
+            <Component {...pageProps} />
+          </Box>
         </SessionContextProvider>
       </ChakraProvider>
     </>
