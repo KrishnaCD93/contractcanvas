@@ -24,6 +24,7 @@ import {
   Stack,
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
+import RegistrationContainer from '@/components/Registration/RegistrationContainer';
 
 interface Milestone {
   milestone: string;
@@ -57,7 +58,9 @@ const ClientRegistrationForm = () => {
     specificRequests: ''
   };
   
-  const [formState, setFormState] = useState<FormState>(initialFormState);  
+  const [formState, setFormState] = useState<FormState>(initialFormState); 
+  
+  const forwardRef = React.useRef<HTMLDivElement>(null);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -336,42 +339,34 @@ const ClientRegistrationForm = () => {
   };
   
   return (
-    <Container
-      boxShadow="lg"
-      maxW="container.xl"
-      p={8}
-      borderRadius="md"
-      borderWidth={1}
+    <RegistrationContainer
+      forwardRef={forwardRef}
+      title="Project Registration"
+      description="Start a project and create a contract to work with people you trust, while protecting your intellectual property."
     >
-    <Heading as="h2" size="lg" textAlign="center" mb={6}>
-      Client Project Registration
-    </Heading>
-    <Text fontSize="md" textAlign="center" mb={6}>
-        Start a project and create a contract to work with people you trust, while protecting your intellectual property.
-      </Text>
-    <form onSubmit={handleSubmit}>
-      <VStack align="stretch" spacing={5}>
-        {renderStepContent()}
-        <Box>
-          {step > 0 && (
-            <Button onClick={prevStep} mt={4} variant="outline">
-              Previous
-            </Button>
-          )}
-          {step < 5 ? (
-            <Button onClick={nextStep} mt={4} variant="outline">
-              Next
-            </Button>
-          ) : (
-            <Button type="submit" mt={4} isLoading={loading}>
-              Submit
-            </Button>
-          )}
-        </Box>
-      </VStack>
-    </form>
-  </Container>
-);
+      <form onSubmit={handleSubmit}>
+        <VStack align="stretch" spacing={5}>
+          {renderStepContent()}
+          <Box>
+            {step > 0 && (
+              <Button onClick={prevStep} mt={4} variant="outline">
+                Previous
+              </Button>
+            )}
+            {step < 5 ? (
+              <Button onClick={nextStep} mt={4} variant="outline">
+                Next
+              </Button>
+            ) : (
+              <Button type="submit" mt={4} isLoading={loading}>
+                Submit
+              </Button>
+            )}
+          </Box>
+        </VStack>
+      </form>
+    </RegistrationContainer>
+  );
 };
 
 export default ClientRegistrationForm;

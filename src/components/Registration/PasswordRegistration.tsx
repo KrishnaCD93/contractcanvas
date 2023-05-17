@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Box,
   Button,
   FormControl,
   FormLabel,
   Input,
   VStack,
   Text,
-  Progress,
+  Progress
 } from '@chakra-ui/react';
 import zxcvbn from 'zxcvbn';
+import RegistrationContainer from './RegistrationContainer';
 
 interface PasswordRegistrationProps {
   forwardRef: React.RefObject<HTMLDivElement>;
@@ -73,12 +73,10 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
   };
 
   return (
-    <Box
-      boxShadow="lg"
-      p={8}
-      borderRadius="md"
-      borderWidth={1}
-      ref={forwardRef}
+    <RegistrationContainer
+      title="Password"
+      description="Choose a password for your account."
+      forwardRef={forwardRef}
     >
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
@@ -116,7 +114,7 @@ const PasswordRegistration: React.FC<PasswordRegistrationProps> = ({
           </Button>
         </VStack>
       </form>
-    </Box>
+    </RegistrationContainer>
   );
 };
 

@@ -12,14 +12,16 @@ import {
   EditableInput,
   EditablePreview,
   IconButton,
+  Icon
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon, EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import RegistrationContainer from "./RegistrationContainer";
 
 interface PortfolioItem {
   id: string;
   title: string;
   link: string;
-  protectedIp: boolean;
+  description: string;
 }
 
 interface PortfolioRegistrationFormProps {
@@ -36,7 +38,7 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
   const [formData, setFormData] = useState({
     title: "",
     link: "",
-    protectedIp: false,
+    description: "",
   });
 
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
@@ -55,7 +57,7 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
       id: Date.now().toString(),
       title: formData.title,
       link: formData.link,
-      protectedIp: formData.protectedIp,
+      description: formData.description,
     };
 
     setPortfolioItems([...portfolioItems, portfolioItem]);
@@ -64,7 +66,7 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
     setFormData({
       title: "",
       link: "",
-      protectedIp: false,
+      description: "",
     });
   };
 
@@ -95,6 +97,7 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
   };  
 
   const handleSubmit = async () => {
+    if (portfolioItems.length === 0 && (!formData.title || !formData.link)) return;
     const uploadedIds = await uploadPortfolioItems('portfolio_items', portfolioItems);
     setPortfolioIds(uploadedIds);
     toast({
@@ -108,12 +111,10 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
   };
 
   return (
-    <Box
-      boxShadow="lg"
-      p={8}
-      borderRadius="md"
-      borderWidth={1}
-      ref={forwardRef}
+    <RegistrationContainer 
+      forwardRef={forwardRef} 
+      title="Portfolio"
+      description="Describe your work and show us your portfolio. You can add as many portfolio items as you like. Help build trust by showing us your work."
     >
       <form onSubmit={handleAddPortfolio}>
         <VStack spacing={4}>
@@ -129,14 +130,34 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
           </FormControl>
           <FormControl isRequired>
             <FormLabel>Link</FormLabel>
-            <Textarea
+            <Input
+              type="text"
               name="link"
               value={formData.link}
               onChange={handleFormChange}
               required
             />
           </FormControl>
-          <Button type="submit">Add Portfolio Item</Button>
+          <FormControl isRequired>
+            <FormLabel>Description</FormLabel>
+            <Textarea
+              name="description"
+              value={formData.description}
+              onChange={handleFormChange}
+              required
+            />
+          </FormControl>
+          <Button
+            size="lg"
+            variant="outline"
+            borderColor="brand.light-cyan"
+            color="brand.space-cadet"
+            _hover={{ bg: "brand.light-cyan-2", color: "brand.space-cadet" }}
+            type="submit"
+          >
+            <Icon as={PlusSquareIcon} mr={2} />
+            Add Portfolio Item
+          </Button>
         </VStack>
       </form>
       <VStack spacing={4} mt={4}>
@@ -177,9 +198,17 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
             />
           </Box>
         ))}
-        <Button onClick={handleSubmit}>Submit Portfolio</Button>
+        <Button
+          size="lg"
+          bg="brand.mint-green"
+          color="brand.space-cadet"
+          onClick={handleSubmit}
+        >
+          <Icon as={CheckIcon} mr={2} />
+          Submit All Portfolio Items
+        </Button>
       </VStack>
-    </Box>
+    </RegistrationContainer>
   );
 };
 

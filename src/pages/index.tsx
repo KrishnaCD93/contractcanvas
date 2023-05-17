@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'next/router';
 import Projects from './projects';
 import Logo from '@/components/Logo';
+import { PrimaryButton, SecondaryButton } from '@/components/Buttons';
 
 export default function HomePage() {
   const router = useRouter();
@@ -43,24 +44,8 @@ export default function HomePage() {
           </Box>
           <Flex mt='10px' justifyContent="center">
             <Stack direction={['column', 'row']} spacing={4}>
-              <Button
-                size="lg"
-                bg="brand.mint-green"
-                color="brand.space-cadet"
-                onClick={() => router.push('/register')}
-              >
-                Get Started
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                borderColor="brand.light-cyan"
-                color="brand.space-cadet"
-                _hover={{ bg: "brand.light-cyan-2", color: "brand.space-cadet" }}
-                onClick={() => router.push('/contract-registration')}
-              >
-                Create Project
-              </Button>
+              <PrimaryButton route="/register" text="Get Started" />
+              <SecondaryButton route="/login" text="Login" />
             </Stack>
           </Flex>
         </Center>

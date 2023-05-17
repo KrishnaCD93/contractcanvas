@@ -1,5 +1,5 @@
 // /pages/register.tsx
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import PortfolioRegistrationForm from '../components/Registration/PortfolioRegistration';
 import PersonalInfoForm from '../components/Registration/PersonalInfoRegistration';
 import { useRouter } from 'next/router';
@@ -8,7 +8,6 @@ import { Database } from '../../types_db';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import PasswordRegistration from '@/components/Registration/PasswordRegistration';
 import ProgressIndicator from '@/components/Registration/ProgressIndicator';
-import DevData from '@/components/ViewZKP';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -43,7 +42,6 @@ const Register: React.FC = () => {
       options: {
         data: {
           full_name: userData.firstName + ' ' + userData.lastName,
-          user_type: 'developer',
           portfolio_ids: portfolioIdsToInsert,
           bio: userData.bio,
         }
@@ -66,7 +64,7 @@ const Register: React.FC = () => {
         duration: 5000,
         isClosable: true,
       });
-      router.push('/dashboard');
+      router.push('/projects');
     }
   }, [portfolioIds, userData, supabaseClient, toast, router]);
 
@@ -84,17 +82,17 @@ const Register: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <PortfolioRegistrationForm
-            forwardRef={portfolioRef}
-            setPortfolioIds={setPortfolioIds}
+          <PersonalInfoForm
+            forwardRef={personalRef}
+            setUserData={setUserData}
             setStep={setStep}
           />
         );
       case 1:
         return (
-          <PersonalInfoForm
-            forwardRef={personalRef}
-            setUserData={setUserData}
+          <PortfolioRegistrationForm
+            forwardRef={portfolioRef}
+            setPortfolioIds={setPortfolioIds}
             setStep={setStep}
           />
         );
@@ -116,7 +114,7 @@ const Register: React.FC = () => {
   return (
     <Container maxW="container.lg">
       <VStack spacing={8} width="100%" py={12}>
-        <ProgressIndicator step={step} />
+        <ProgressIndicator currentStep={step} setStep={setStep} />
         {renderForm()}
       </VStack>
     </Container>

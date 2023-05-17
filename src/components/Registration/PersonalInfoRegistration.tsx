@@ -6,9 +6,9 @@ import {
   FormLabel,
   Input,
   VStack,
-  Textarea,
-  useToast,
+  Textarea
 } from "@chakra-ui/react";
+import RegistrationContainer from "./RegistrationContainer";
 
 interface PersonalInfoRegistrationProps {
 forwardRef: React.RefObject<HTMLDivElement>;
@@ -39,12 +39,10 @@ const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ for
   };
 
   return (
-    <Box
-      boxShadow="lg"
-      p={8}
-      borderRadius="md"
-      borderWidth={1}
-      ref={forwardRef}
+    <RegistrationContainer
+      forwardRef={forwardRef}
+      title="Personal Info"
+      description="Tell us a little about yourself."
     >
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
@@ -89,7 +87,7 @@ const PersonalInfoRegistration: React.FC<PersonalInfoRegistrationProps> = ({ for
           <Button type="submit">Update Personal Info</Button>
         </VStack>
       </form>
-    </Box>
+    </RegistrationContainer>
   );
 };
 

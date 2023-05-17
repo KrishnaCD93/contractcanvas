@@ -21,6 +21,7 @@ import {
   TabPanel,
 } from '@chakra-ui/react';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
+import RegistrationContainer from './RegistrationContainer';
 
 interface DeveloperRegistrationProps extends DeveloperZKP {
   forwardRef: React.RefObject<HTMLDivElement>;
@@ -431,20 +432,11 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   };
 
   return (
-    <Container
-      boxShadow="lg"
-      maxW="container.xl"
-      p={8}
-      borderRadius="md"
-      borderWidth={1}
-      ref={forwardRef}
-    >
-      <Heading as="h2" size="lg" textAlign="center" mb={6}>
-        Developer Registration
-      </Heading>
-      <Text fontSize="md" textAlign="center" mb={6}>
-        Join ContractCanvas as a developer and collaborate on projects with people you trust, while protecting your intellectual property.
-      </Text>
+    <RegistrationContainer
+      forwardRef={forwardRef}
+      title="Developer Registration"
+      description="Join ContractCanvas as a developer and collaborate on projects with people you trust, while protecting your intellectual property."
+      >
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           {renderStepContent()}
@@ -463,7 +455,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
           {devStep > 0 && <Button variant='ghost' onClick={() => setDevStep(devStep - 1)}>Previous</Button>}
         </VStack>
       </form>
-    </Container>
+    </RegistrationContainer>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   Container,
 } from '@chakra-ui/react';
 import { ProjectCard, Project } from '@/components/ProjectCard';
+import { PrimaryButton } from '@/components/Buttons';
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -81,6 +82,7 @@ const Projects = () => {
         <Heading as="h1" size="2xl" textAlign="center" mb={6}>
           Projects
         </Heading>
+        <PrimaryButton route="/contract-registration" text="Create New Project" />
         <SimpleGrid columns={[1, null, 2]} spacing={10}>
           {projects.map((project) => (
             <ProjectCard key={project.id} {...project} onDelete={handleDelete} />
