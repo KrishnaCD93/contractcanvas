@@ -1,24 +1,17 @@
 // pages/index.tsx
 import {
   Box,
-  Button,
   Center,
   Container,
   Flex,
-  Image,
-  Heading,
   Stack,
   Text,
-  useColorModeValue
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
 import Projects from './projects';
 import Logo from '@/components/Logo';
-import { PrimaryButton, SecondaryButton } from '@/components/Buttons';
+import { PrimaryButton } from '@/components/Buttons';
 
 export default function HomePage() {
-  const router = useRouter();
-
   return (
     <Container maxW="container.xl">
       <Box as="section" pt={20} pb={32}>
@@ -44,7 +37,7 @@ export default function HomePage() {
           </Box>
           <Flex mt='10px' justifyContent="center">
             <Stack direction={['column', 'row']} spacing={4}>
-              <PrimaryButton route="/project-register" text="Request A Project" />
+              <PrimaryButton route="/client-register" text="Request A Project" />
               <PrimaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
             </Stack>
           </Flex>
