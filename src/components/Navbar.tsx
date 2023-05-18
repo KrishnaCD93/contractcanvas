@@ -135,8 +135,27 @@ export const Navbar = () => {
                     </>
                   ) : (
                     <>
-                      <Link href="/register">Register</Link>
                       <Link href="/login">Login</Link>
+                      <Menu>
+                        <MenuButton 
+                          as={Button}
+                          rightIcon={<FiChevronDown />}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          Register
+                        </MenuButton>
+                        <MenuList>
+                          <MenuItem>
+                            <Link href="/freelancer-register">
+                              Freelancer Register
+                            </Link>
+                            <Link href="/client-register">
+                              Client Register
+                            </Link>
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
                     </>
                   )}
                 </VStack>
@@ -188,12 +207,29 @@ export const Navbar = () => {
             </>
           ) : (
             <>
-              <Link href="/register" color='brand.space-cadet'>
-                Register
-              </Link>
-              <Link href="/login" color='brand.space-cadet'>
-                Login
-              </Link>
+              <Link href="/login">Login</Link>
+              <Menu>
+                <MenuButton 
+                  as={Button}
+                  rightIcon={<FiChevronDown />}
+                  variant="ghost"
+                  color={'brand.space-cadet'}
+                >
+                  Register
+                </MenuButton>
+                <MenuList>
+                  <MenuItem>
+                    <Link href="/freelancer-register">
+                      Register as Freelancer
+                    </Link>
+                  </MenuItem>
+                  <MenuItem>
+                    <Link href="/client-register">
+                      Register as Client
+                    </Link>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </>
           )}
         </HStack>

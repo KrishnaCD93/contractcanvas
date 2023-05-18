@@ -5,16 +5,15 @@ interface ProgressIndicatorProps {
   currentStep: number;
   setStep: (step: number) => void;
   progressPercent: number;
-  setProgressPercent: (percent: number) => void;
+  stepData: { step: number; label: string }[];
 }
 
-const ProgressIndicator: React.FC<ProgressIndicatorProps>= ({ currentStep, setStep, progressPercent, setProgressPercent }) => {
-  const stepData = [
-    { label: "Personal Info", step: 1 },
-    { label: "Portfolio", step: 2 },
-    { label: "Password", step: 3 },
-    { label: "Confirm", step: 4 },
-  ];
+const ProgressIndicator: React.FC<ProgressIndicatorProps>= ({ 
+  currentStep, 
+  setStep, 
+  progressPercent, 
+  stepData
+}) => {
 
   return (
     <Center>
@@ -23,7 +22,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps>= ({ currentStep, setSt
         <Stack direction="row" justifyContent="space-between" spacing={4}>
           {stepData.map((step, index) => (
             <Box 
-            key={index} 
+              key={index} 
               onClick={() => {
                 if (index === 3) return
                 setStep(index)
@@ -31,13 +30,14 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps>= ({ currentStep, setSt
               cursor={index === 3 ? "default" : "pointer"}
             >
               <HStack>
-                <Box borderRadius="full" bg={currentStep === index ? "brand.space-cadet" : "brand.light-cyan-2"} w={8} h={8}>
+                <Box borderRadius="full" bg={currentStep === index ? "brand.space-cadet" : "brand.cool-grey"} w={8} h={8}>
                   <Center h="100%">
-                    <Text color="white" fontWeight="bold">{step.step}</Text>
+                    <Text color={currentStep === index ? "brand.mint-green" : "brand.space-cadet"}
+                      fontWeight="bold">{step.step}</Text>
                   </Center>
                 </Box>
                 <Text 
-                  color={currentStep === index ? "brand.space-cadet" : "brand.light-cyan-2"} 
+                  color={currentStep === index ? "brand.space-cadet" : "brand.cool-grey"} 
                   fontWeight={currentStep === index ? "bold" : "normal"}
                 >
                   {step.label}

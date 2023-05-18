@@ -1,5 +1,5 @@
-// /pages/register.tsx
-import React, { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
+// /pages/freelancer-register.tsx
+import React, { useEffect, useRef, useState } from 'react';
 import PortfolioRegistrationForm from '../components/Registration/PortfolioRegistration';
 import PersonalInfoForm from '../components/Registration/PersonalInfoRegistration';
 import { Container, Divider, Text, VStack, useToast } from '@chakra-ui/react';
@@ -11,11 +11,24 @@ import Link from 'next/link';
 import { PrimaryButton } from '@/components/Buttons';
 import RegistrationContainer from '@/components/Registration/RegistrationContainer';
 
+export interface PortfolioItemsToUpload {
+  title: string;
+  link: string;
+  description: string;
+}
+
+const stepData = [
+  { label: "Personal Info", step: 1 },
+  { label: "Portfolio", step: 2 },
+  { label: "Password", step: 3 },
+  { label: "Confirm", step: 4 },
+];
+
 const Register: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [portfolioIds, setPortfolioIds] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>({});
   const [progressPercent, setProgressPercent] = useState(10);
+  const [portfolioItemsToUpload, setPortfolioItemsToUpload] = useState<PortfolioItemsToUpload[]>([]);
 
   const portfolioRef = useRef<HTMLDivElement>(null);
   const personalRef = useRef<HTMLDivElement>(null);
@@ -34,23 +47,34 @@ const Register: React.FC = () => {
     }
   }, [step]);
 
+  const uploadPortfolioItems = async (database: string, values: any[]) => {
+    const response = await fetch(`/api/supabase-fetch?database=${database}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ values }),
+    });
+  
+    const { result } = await response.json();
+    console.log('Uploaded dev data:', result);
+    return result;
+  };
+
   const handleSignUp = async () => {
-    const portfolioIdsToInsert = portfolioIds.map((id) => ({
-      id,
-    }));
-    console.log('portfolioIdsToInsert', portfolioIdsToInsert)
     console.log('userData', userData)
-    const { error } = await supabaseClient.auth.signUp({
+    
+    const { data: { user }, error } = await supabaseClient.auth.signUp({
       email: userData.email,
       password: userData.password,
       options: {
         data: {
           full_name: userData.firstName + ' ' + userData.lastName,
-          portfolio_ids: portfolioIdsToInsert,
           bio: userData.bio,
         }
       }
     });
+    
     if (error) {
       console.log(error);
       toast({
@@ -61,18 +85,38 @@ const Register: React.FC = () => {
         isClosable: true,
       });
     } else {
-      toast({
-        title: 'Success',
-        description: 'Registration successful.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-      setProgressPercent(100);
-      setStep(3);
+      if (portfolioItemsToUpload.length > 0 && user?.id) {
+        console.log('portfolio', portfolioItemsToUpload)
+        const portfolioItemsToUploadWithUserId = portfolioItemsToUpload.map((item) => {
+          return {
+            ...item,
+            user_id: user.id,
+          };
+        });
+        const portfolioIds = await uploadPortfolioItems('portfolio_items', portfolioItemsToUploadWithUserId);
+        if (portfolioIds && portfolioIds.length > 0) {
+          toast({
+            title: 'Success',
+            description: 'Registration successful.',
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          });
+          setProgressPercent(100);
+          setStep(3);
+        } else {
+          toast({
+            title: 'Error',
+            description: 'There was a problem uploading portfolio items.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      };
     }
   }
-
+  
   const renderForm = () => {
     switch (step) {
       case 0:
@@ -89,7 +133,7 @@ const Register: React.FC = () => {
         return (
           <PortfolioRegistrationForm
             forwardRef={portfolioRef}
-            setPortfolioIds={setPortfolioIds}
+            setPortfolioItemsToUpload={setPortfolioItemsToUpload}
             step={step}
             setStep={setStep}
             setProgressPercent={setProgressPercent}
@@ -106,7 +150,7 @@ const Register: React.FC = () => {
       case 3:
         return (
           <RegistrationContainer
-            title="Registration successful"
+            title={`Welcome, ${userData.firstName}!`}
             description='Please check your email to verify your account.'
             forwardRef={null}
           >
@@ -130,7 +174,12 @@ const Register: React.FC = () => {
   return (
     <Container maxW="container.lg">
       <VStack spacing={8} width="100%" py={6}>
-        <ProgressIndicator currentStep={step} setStep={setStep} progressPercent={progressPercent} setProgressPercent={setProgressPercent} />
+        <ProgressIndicator 
+          currentStep={step} 
+          setStep={setStep} 
+          progressPercent={progressPercent} 
+          stepData={stepData}
+        />
         {renderForm()}
       </VStack>
       {step < 3 && <Text fontSize="sm" textAlign="center">

@@ -7,16 +7,17 @@ import {
   Input,
   VStack,
   Textarea,
-  useToast,
   Editable,
   EditableInput,
   EditablePreview,
   IconButton,
   Icon,
-  SimpleGrid
+  SimpleGrid,
+  EditableTextarea
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import RegistrationContainer from "./RegistrationContainer";
+import { PortfolioItemsToUpload } from "@/pages/freelancer-register";
 
 interface PortfolioItem {
   id: string;
@@ -27,7 +28,7 @@ interface PortfolioItem {
 
 interface PortfolioRegistrationFormProps {
   forwardRef: React.Ref<HTMLDivElement>;
-  setPortfolioIds: (ids: string[]) => void;
+  setPortfolioItemsToUpload: (items: PortfolioItemsToUpload[]) => void;
   step: number;
   setStep: (step: number) => void;
   setProgressPercent: (percent: number) => void;
@@ -35,7 +36,7 @@ interface PortfolioRegistrationFormProps {
 
 const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
   forwardRef,
-  setPortfolioIds,
+  setPortfolioItemsToUpload,
   step,
   setStep,
   setProgressPercent,
@@ -46,10 +47,8 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
     description: "",
   });
 
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-
-  const toast = useToast();
-
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([])
+  
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -87,20 +86,6 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
     setPortfolioItems(portfolioItems.filter((item) => item.id !== id));
   };
 
-  const uploadPortfolioItems = async (database: string, values: any[]) => {
-    const response = await fetch(`/api/supabase-fetch?database=${database}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ values }),
-    });
-  
-    const { result } = await response.json();
-    console.log('Uploaded dev data:', result);
-    return result;
-  };  
-
   const handleSubmit = async () => {
     if (portfolioItems.length === 0 && (!formData.title || !formData.link)) return;
     const portfolioItemsToUpload: any[] = [];
@@ -112,28 +97,10 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
       });
     });
     if (portfolioItemsToUpload.length > 0) {
-      const uploadedIds: any[] = await uploadPortfolioItems('portfolio_items', portfolioItemsToUpload);
-      if (uploadedIds && uploadedIds.length === 0) {
-        toast({
-          title: "Error upload portfolio items.",
-          description: "We encountered an error and your portfolio items were not updated. Please try again.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-        return;
-      };
-      setPortfolioIds(uploadedIds);
-    }
-    toast({
-      title: "Portfolio items updated.",
-      description: "Your portfolio items were updated successfully.",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
-    setProgressPercent(66);
-    setStep(step + 1);
+      setPortfolioItemsToUpload(portfolioItemsToUpload)
+      setProgressPercent(66);
+      setStep(step + 1);
+    };
   };
 
   return (
@@ -209,7 +176,7 @@ const PortfolioRegistrationForm: React.FC<PortfolioRegistrationFormProps> = ({
                 onSubmit={(value) => handleUpdate(item.id, "description", value)}
               >
                 <EditablePreview />
-                <EditableInput />
+                <EditableTextarea />
               </Editable>
               <IconButton
                 aria-label="Delete portfolio item"
