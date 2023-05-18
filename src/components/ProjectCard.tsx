@@ -20,7 +20,7 @@ interface ProjectCardProps extends ProjectItems {
   user: any;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ 
+const ProjectCard: React.FC<ProjectCardProps> = ({ 
   onDelete, 
   user,
   id,
@@ -66,3 +66,5 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     </Box>
   );
 };
+
+export default ProjectCard;

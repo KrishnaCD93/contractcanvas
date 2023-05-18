@@ -1,6 +1,6 @@
 // /src/components/Projects.tsx
 import { Container, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
-import { ProjectCard, ProjectItems } from "./ProjectCard";
+import ProjectCard, { ProjectItems } from "./ProjectCard";
 import { useCallback, useEffect, useState } from "react";
 import { Divider } from "antd";
 import { useUser } from "@supabase/auth-helpers-react";

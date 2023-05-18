@@ -9,7 +9,7 @@ import {
   Container,
   Button,
 } from '@chakra-ui/react';
-import { ProjectCard, Project } from '@/components/ProjectCard';
+import ProjectCard, { ProjectItems } from '@/components/ProjectCard';
 import { useUser } from '@supabase/auth-helpers-react';
 
 const fetchPortfolio = async (database: string) => {
