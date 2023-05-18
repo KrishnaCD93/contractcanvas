@@ -47,7 +47,7 @@ const uploadPortfolioItem = async (database: string, values: any[]) => {
 
 const Dashboard = () => {
   const user = useUser();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectItems[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAndSetPortfolioItems = useCallback(async () => {
@@ -89,7 +89,7 @@ const Dashboard = () => {
       </Button>
       <SimpleGrid columns={[1, null, 2]} spacing={10}>
         {projects.map((project, idx) => (
-          <ProjectCard key={idx} {...project} onDelete={handleDelete} />
+          <ProjectCard key={idx} {...project} user={user ? user : null} onDelete={handleDelete} />
         ))}
       </SimpleGrid>
     </Box>
