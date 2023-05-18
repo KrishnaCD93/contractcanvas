@@ -44,8 +44,8 @@ export default function HomePage() {
           </Box>
           <Flex mt='10px' justifyContent="center">
             <Stack direction={['column', 'row']} spacing={4}>
-              <PrimaryButton route="/register" text="Get Started" />
-              <SecondaryButton route="/login" text="Login" />
+              <PrimaryButton route="/project-register" text="Request A Project" />
+              <PrimaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
             </Stack>
           </Flex>
         </Center>
