@@ -7,7 +7,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import Projects from './projects';
+import Projects from '@/components/Projects';
 import Logo from '@/components/Logo';
 import { PrimaryButton } from '@/components/Buttons';
 
