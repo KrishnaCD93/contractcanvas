@@ -26,6 +26,12 @@ const ProjectRegistration = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      router.push('/client-register');
+    }
+  }, [user, router]);  
+
+  useEffect(() => {
       if (projectItemsToUpload) {
       console.log('project', projectItemsToUpload)
       const projectItemsToUploadWithUserId = {
@@ -58,8 +64,6 @@ const ProjectRegistration = () => {
         />
       </Box>
     )
-  } else {
-    router.push('/client-register')
   }
 }
 
