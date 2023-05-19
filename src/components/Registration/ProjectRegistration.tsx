@@ -55,7 +55,6 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
   setProgressPercent,
 }) => {
   const toast = useToast();
-  const [loading, setLoading] = useState(false);
   const [projectStep, setProjectStep] = useState(0);
 
   const initialFormState = {
@@ -104,7 +103,6 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Form state', formState);
-    setLoading(true);
 
     if (!formState.scope || !formState.milestones || !formState.budget || !formState.name || !formState.description) {
       toast({
@@ -114,7 +112,6 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
         duration: 5000,
         isClosable: true,
       });
-      setLoading(false);
       return;
     }
 
@@ -132,7 +129,7 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
 
     setProjectItemsToUpload(projectData);
 
-    setLoading(false);
+    setProgressPercent(66);
     setStep(step + 1);
   };
 
@@ -326,7 +323,7 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
         <VStack align="stretch" spacing={5}>
           {renderStepContent()}
           <Box>
-            {step > 0 && (
+            {projectStep > 0 && (
               <Button onClick={prevStep} mt={4} variant="outline"
                 bg="brand.light-blue"
                 color="brand.space-cadet"
@@ -334,7 +331,7 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
                 Previous
               </Button>
             )}
-            {step < 5 ? (
+            {projectStep < 6 ? (
               <Button onClick={nextStep} mt={4} variant="outline"
                 bg="brand.mint-green"
                 color="brand.space-cadet"

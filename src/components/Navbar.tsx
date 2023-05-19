@@ -21,50 +21,31 @@ import {
   DrawerHeader,
   DrawerBody,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Database } from '@/../types_db';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 export const Navbar = () => {
   const [userName, setUserName] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const user = useUser();
   const router = useRouter();
 
   const supabaseClient = useSupabaseClient<Database>();
 
-  const fetchData = useCallback( async function fetchUserData(userId: string) {
+  useCallback(() => {
     setUserName(user?.user_metadata.full_name || null);
-    const { data, error } = await supabaseClient
-      .from('profiles')
-      .select('full_name, avatar_url')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user data:', error.message);
-    } else {
-      setUserName(data.full_name);
-      setAvatarUrl(data.avatar_url);
-    }
-  }, [supabaseClient, user]);
+  }, [user]);
 
   const logout = async () => {
     await supabaseClient.auth.signOut();
     router.push('/login');
   };
-
-  useEffect(() => {
-    if (user) {
-      fetchData(user.id);
-    }
-  }, [user, fetchData]);
+  
   return (
     <Box
       bg='brand.mint-green'
@@ -115,11 +96,7 @@ export const Navbar = () => {
                           size="sm"
                           variant="ghost"
                         >
-                          {avatarUrl ? (
-                            <Avatar size="sm" src={avatarUrl} />
-                          ) : (
-                            userName?.split(' ').map((name) => name[0]).join('')
-                          )}
+                          {userName?.split(' ').map((name) => name[0]).join('')}
                         </MenuButton>
                         <MenuList>
                           <MenuItem onClick={() => router.push('/project-registration')}>
@@ -187,11 +164,7 @@ export const Navbar = () => {
                   variant="ghost"
                   color={'brand.space-cadet'}
                 >
-                  {avatarUrl ? (
-                    <Avatar size="sm" src={avatarUrl} />
-                  ) : (
-                    userName?.split(' ').map((name) => name[0]).join('')
-                  )}
+                  {userName?.split(' ').map((name) => name[0]).join('')}
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={() => router.push('/contract-registration')}>

@@ -9,8 +9,6 @@ import { SecondaryButton } from '@/components/Buttons';
 import Projects from '@/components/Projects';
 
 const ProjectPage = () => {
-  
-  
   return (
     <Container maxW="container.xl">
       <Box as="section" pt={20} pb={32} textAlign='center'>

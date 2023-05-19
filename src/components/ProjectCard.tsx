@@ -1,18 +1,19 @@
 import { Box, Button, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
-import { useUser } from '@supabase/auth-helpers-react';
+import Logo from "./Logo";
 
 export interface ProjectItems {
   id: string;
   name: string;
   description: string;
   scope: string;
-  milestones: any[];
+  milestones: {milestone: string, targetDate: ""}[];
   budget: number;
   terms_and_conditions: string;
   specific_requests: string;
   protected_ip: boolean;
   user_id: string;
+  created_at: Date;
 }
 
 interface ProjectCardProps extends ProjectItems {
@@ -44,19 +45,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       bg="brand.white"
       color="brand.space-cadet"
     >
-      <VStack align="start" spacing={4}>
-        <Text>{name}</Text>
+      <VStack align="stretch" spacing={4}>
+        <Logo h={200} w={200} />
+        <Text fontWeight={'bold'}>{name}</Text>
         <Text>{description}</Text>
-        {protected_ip ? <Text color="brand.cool-gray">Protected Information</Text> :
+        {protected_ip ? <Text color="brand.cool-gray">Protected Information. Submit a bid to view.</Text> :
         (<><Text><b>Scope:</b> {scope}</Text>
-        <Text><b>Milestones:</b> {milestones.map((milestone) => milestone.title).join(', ')}</Text>
+        <Text><b>Milestones:</b> {milestones.map((milestone) => 
+          milestone.milestone + `: ` + new Date(milestone.targetDate).toLocaleDateString() + ` `
+        )}</Text>
         <Text><b>Budget Range:</b> ${budget}</Text>
-        <Text><b>Terms and Conditions:</b> {terms_and_conditions}</Text>
-        <Text><b>Specific Requests:</b> {specific_requests}</Text></>)}
+        <Text><b>Terms and Conditions:</b> {terms_and_conditions ? terms_and_conditions : `N/A`}</Text>
+        <Text><b>Specific Requests:</b> {specific_requests ? specific_requests : `N/A`}</Text></>)}
         <Link href={`/${id}/bid`} passHref>
-          <Button as="a" colorScheme="brand.light-cyan-2">
-            Bid
-          </Button>
+          <Box backgroundColor={'brand.light-cyan-2'} as={Button}>Bid</Box>
         </Link>
         {user && user.id === user_id && 
         <Button colorScheme="red" onClick={() => onDelete(id)}>

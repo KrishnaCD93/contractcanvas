@@ -17,6 +17,7 @@ const Projects = () => {
     specific_requests: "", 
     protected_ip: false,
     user_id: "",
+    created_at: new Date(),
   }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +40,8 @@ const Projects = () => {
   const fetchAndSetProjects = useCallback(async () => {
     const fetchedProjects = await fetchProjects();
     if (fetchedProjects) {
-      setProjects(fetchedProjects);
+      // set projects in reverse chronological order
+      setProjects(fetchedProjects.reverse());
     }
     setLoading(false);
   }, []);
@@ -67,18 +69,14 @@ const Projects = () => {
 
   if (loading) {
     return (
-      <Container centerContent>
+      <Container my={2} centerContent>
         <Spinner />
       </Container>
     );
   }
   
   if (error) {
-    return (
-      <Container centerContent>
-        <Text>Error: {error}</Text>
-      </Container>
-    );
+    console.log(error);
   }
 
   return (
