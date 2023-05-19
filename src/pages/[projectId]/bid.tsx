@@ -25,6 +25,7 @@ const BidPage = () => {
   const [signals, setSignals] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [project, setProject] = useState<any>({});
   const [devInfo, setDevInfo] = useState<DeveloperInfoData>({
     rate: '',
     availability: '',
@@ -42,10 +43,21 @@ const BidPage = () => {
   const devRef = useRef<HTMLDivElement>(null);
 
   const budget = useCallback(() => {
-    fetch('/api/supabase-fetch?table=projects&id=' + projectId, {
+    fetch(`/api/supabase-fetch-id?database=projects&id=${projectId}`, {
       method: 'GET',
     })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('data', data);
+        setMaxBudget(data.result[0].budget);
+        setProject(data.result[0]);
+      }
+    );
   }, [projectId]);
+
+  useEffect(() => {
+    budget();
+  }, [budget]);
 
   const runProofs = async () => {
     if (maxBudget.length === 0 || bidAmount.length === 0) return;
@@ -116,13 +128,13 @@ const BidPage = () => {
 
   return (
     <Box p={4}>
-      <Heading as="h2" size="lg" textAlign="center" mb={6}>
+      {maxBudget && (<><Heading as="h2" size="lg" textAlign="center" mb={6}>
         Add Your Bid
       </Heading>
       <VStack spacing={4}>
         <FormControl isRequired>
           <FormLabel>Maximum Budget</FormLabel>
-          <Input type="number" value={maxBudget} onChange={changeMaxBudget} />
+          <Input type="password" value={maxBudget} onChange={changeMaxBudget} />
         </FormControl>
         <FormControl isRequired>
           <FormLabel>Bid Amount</FormLabel>
@@ -131,7 +143,7 @@ const BidPage = () => {
         <Button isLoading={loading} onClick={runProofs} colorScheme="blue">
           Submit Bid
         </Button>
-      </VStack>
+      </VStack></>)}
       {isValid && (
         <Box mt={8}>
           <Heading as="h3" size="md" textAlign="center" mb={4}>
