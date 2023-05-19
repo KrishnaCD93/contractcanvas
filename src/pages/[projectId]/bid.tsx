@@ -48,7 +48,6 @@ const BidPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log('data', data);
         setMaxBudget(data.result[0].budget);
         setProject(data.result[0]);
       }
@@ -134,7 +133,7 @@ const BidPage = () => {
       <VStack spacing={4}>
         <FormControl isRequired>
           <FormLabel>Maximum Budget</FormLabel>
-          <Input type="password" value={maxBudget} onChange={changeMaxBudget} />
+          <Input isDisabled value={'******'} onChange={changeMaxBudget} />
         </FormControl>
         <FormControl isRequired>
           <FormLabel>Bid Amount</FormLabel>
