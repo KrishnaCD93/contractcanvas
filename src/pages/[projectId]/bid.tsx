@@ -66,14 +66,16 @@ const BidPage = () => {
     const response = await fetch('/api/bid-validity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ maxBudget, bidAmount }),
+      body: JSON.stringify({ maxBudget, acceptedPrice: bidAmount }),
     });
     const { proof: _proof, publicSignals: _signals, isValid: _isValid } = await response.json();
 
     setProof(_proof);
     setSignals(_signals);
     setIsValid(_isValid);
-
+    console.log('proof', proof);
+    console.log('signals', signals);
+    console.log('isValid', isValid);
     setLoading(false);
   };
 
@@ -139,23 +141,15 @@ const BidPage = () => {
           <FormLabel>Bid Amount</FormLabel>
           <Input type="number" value={bidAmount} onChange={changeAcceptedPrice} />
         </FormControl>
-        <Button isLoading={loading} onClick={runProofs} colorScheme="blue">
+        {!isValid && <Button isLoading={loading} onClick={runProofs} colorScheme="blue">
           Submit Bid
-        </Button>
+        </Button>}
       </VStack></>)}
       {isValid && (
         <Box mt={8}>
           <Heading as="h3" size="md" textAlign="center" mb={4}>
             Proof Details
           </Heading>
-          <Text fontSize="sm" mb={2}>
-            <strong>Proof:</strong>
-          </Text>
-          <Textarea value={proof} readOnly />
-          <Text fontSize="sm" mb={2} mt={4}>
-            <strong>Public Signals:</strong>
-          </Text>
-          <Textarea value={signals} readOnly />
           {signals[0] === '1' && 
             <DeveloperRegistrationForm
               forwardRef={devRef}

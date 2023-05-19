@@ -246,17 +246,17 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   };
 
   // Define states to track validation status
-  const [rateValidated, setRateValidated] = useState(false);
-  const [availabilityValidated, setAvailabilityValidated] = useState(false);
-  const [skillsValidated, setSkillsValidated] = useState(false);
+  const [rateValidated, setRateValidated] = useState<boolean>();
+  const [availabilityValidated, setAvailabilityValidated] = useState<boolean>();
+  const [skillsValidated, setSkillsValidated] = useState<boolean>();
 
   const renderStepContent = () => {
     return (
       <Tabs isFitted variant='enclosed' index={devStep} onChange={index => setDevStep(index)}>
         <TabList mb='1em'>
-          <Tab minW={150} color={devStep > 0 && rateValidated ? "inherit" : "red"}>Rate{rateValidated ? "" : " *"}</Tab>
-          <Tab minW={150} color={devStep > 1 && availabilityValidated ? "inherit" : "red"}>Availability{availabilityValidated ? "" : " *"}</Tab>
-          <Tab minW={150} color={devStep > 2 && skillsValidated ? "inherit" : "red"}>Skills{skillsValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={rateValidated === undefined || rateValidated === true ? "inherit" : "red"}>Rate{rateValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={availabilityValidated === undefined || availabilityValidated === true ? "inherit" : "red"}>Availability{availabilityValidated ? "" : " *"}</Tab>
+          <Tab minW={150} color={skillsValidated === undefined || skillsValidated === true ? "inherit" : "red"}>Skills{skillsValidated ? "" : " *"}</Tab>
           <Tab minW={150}>Resume</Tab>
           <Tab minW={150}>Exclusions</Tab>
         </TabList>

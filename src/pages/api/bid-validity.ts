@@ -17,7 +17,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { proof, publicSignals } = await snarkjs.groth16.fullProve({ maxBudget, acceptedPrice }, wasmFile, zkeyFile);
     const vkey = JSON.parse(fs.readFileSync(verificationKeyPath, 'utf8'));
     const isValid = await snarkjs.groth16.verify(vkey, publicSignals, proof);
-
+    console.log('proof:', proof);
+    console.log('publicSignals:', publicSignals);
+    console.log('isValid:', isValid);
     // Return the proof, publicSignals, and isValid in the API response
     res.status(200).json({ proof, publicSignals, isValid });
   } catch (error) {
