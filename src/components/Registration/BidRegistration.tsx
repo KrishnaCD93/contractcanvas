@@ -23,10 +23,10 @@ import {
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 import RegistrationContainer from './RegistrationContainer';
 
-interface DeveloperRegistrationProps extends DeveloperZKP {
+interface DeveloperRegistrationProps {
   forwardRef: React.RefObject<HTMLDivElement>;
   setDevInfo: (devInfo: any) => void;
-  setDevZKP: (devZKP: DeveloperZKP) => void;
+  setDevZKP: (devZKP: any) => void;
   rate: string;
 }
 

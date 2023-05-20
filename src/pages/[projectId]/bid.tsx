@@ -15,9 +15,12 @@ import {
 import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../../components/Registration/BidRegistration';
 import DevData from '@/components/ViewZKP';
 import { useRouter } from 'next/router';
+import { ProjectItems } from '@/components/ProjectCard';
+import { useUser } from '@supabase/auth-helpers-react';
 
 const BidPage = () => {
   const router = useRouter();
+  const user = useUser();
   const { projectId } = router.query;
   const [maxBudget, setMaxBudget] = useState('');
   const [bidAmount, setBidAmount] = useState('');
@@ -25,7 +28,7 @@ const BidPage = () => {
   const [signals, setSignals] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [project, setProject] = useState<any>({});
+  const [project, setProject] = useState<ProjectItems>();
   const [devInfo, setDevInfo] = useState<DeveloperInfoData>({
     rate: '',
     availability: '',
@@ -33,11 +36,7 @@ const BidPage = () => {
     resumeFileName: '',
     exclusions: [],
   });
-  const [devZKP, setDevZKP] = useState<DeveloperZKP>({
-    proof: '',
-    signals: [],
-    isValid: false,
-  });
+  const [devZKP, setDevZKP] = useState<DeveloperZKP>();
 
   const toast = useToast();
   const devRef = useRef<HTMLDivElement>(null);
@@ -73,9 +72,6 @@ const BidPage = () => {
     setProof(_proof);
     setSignals(_signals);
     setIsValid(_isValid);
-    console.log('proof', proof);
-    console.log('signals', signals);
-    console.log('isValid', isValid);
     setLoading(false);
   };
 
@@ -86,21 +82,12 @@ const BidPage = () => {
   }, [signals]);
 
   const submitBid = async () => {
-    if (!devZKP.isValid) {
-      toast({
-        title: 'Invalid ZKP',
-        description: 'Please make sure your ZKP is valid before submitting your bid.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
+    const userId = user?.id;
 
     const response = await fetch('/api/redis-storage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ proof, signals }),
+      body: JSON.stringify({ userId, devZKP }),
     })
     const { error } = await response.json();
 
@@ -123,6 +110,13 @@ const BidPage = () => {
       isClosable: true,
     });
   };
+
+  useEffect(() => {
+    if (devZKP?.isValid === true) {
+      submitBid();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [devZKP]);
 
   const changeMaxBudget = (e: { target: { value: React.SetStateAction<string> } }) => setMaxBudget(e.target.value);
   const changeAcceptedPrice = (e: { target: { value: React.SetStateAction<string> } }) => setBidAmount(e.target.value);
@@ -156,7 +150,6 @@ const BidPage = () => {
               setDevInfo={setDevInfo}
               setDevZKP={setDevZKP}
               rate={bidAmount}
-              proof={''} signals={[]} isValid={false} 
             />
             }
             {devZKP && <DevData devZKP={devZKP} title="Developer ZKP" />}
