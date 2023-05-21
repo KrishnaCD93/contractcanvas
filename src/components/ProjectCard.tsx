@@ -49,11 +49,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <Logo h={200} w={200} />
         <Text fontWeight={'bold'}>{name}</Text>
         <Text>{description}</Text>
-        {protected_ip ? <Text color="brand.cool-gray">Protected Information. Submit a bid to view.</Text> :
-        (<><Text><b>Scope:</b> {scope}</Text>
+        <Text><b>Scope:</b> {scope}</Text>
         <Text><b>Milestones:</b> {milestones.map((milestone) => 
-          milestone.milestone + `: ` + new Date(milestone.targetDate).toLocaleDateString() + ` `
+          milestone.milestone + `: ` + new Date(milestone.targetDate).toLocaleDateString() + `\n`
         )}</Text>
+        {protected_ip ? <Text color="brand.cool-gray">Protected Information. Submit a bid to view.</Text> :
+        (<>
         <Text><b>Budget Range:</b> ${budget}</Text>
         <Text><b>Terms and Conditions:</b> {terms_and_conditions ? terms_and_conditions : `N/A`}</Text>
         <Text><b>Specific Requests:</b> {specific_requests ? specific_requests : `N/A`}</Text></>)}
