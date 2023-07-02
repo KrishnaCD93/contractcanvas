@@ -1,6 +1,7 @@
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Icon, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import Logo from "./Logo";
+import { DeleteIcon } from "@chakra-ui/icons";
 
 export interface ProjectItems {
   id: string;
@@ -63,7 +64,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </Link>
         {user && user.id === user_id && 
         <Button colorScheme="red" onClick={() => onDelete(id)}>
-          Delete
+          <Icon as={DeleteIcon} />
         </Button>}
       </VStack>
     </Box>

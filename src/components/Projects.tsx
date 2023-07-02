@@ -49,21 +49,15 @@ const Projects = () => {
   useEffect(() => {
     fetchAndSetProjects();
   }, [fetchAndSetProjects]);  
-
-  const deleteProject = async (id: string) => {
-    const response = await fetch(`/api/supabase-fetch?database=client_projects&id=${id}`, {
+  
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/supabase-fetch?database=client_projects&id=${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-  
-    const { result } = await response.json();
-    return result;
-  };  
-  
-  const handleDelete = async (id: string) => {
-    await deleteProject(id);
+    
     setProjects(projects.filter((project) => project.id !== id));
   };
 

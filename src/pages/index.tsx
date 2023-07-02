@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import Projects from '@/components/Projects';
 import Logo from '@/components/Logo';
-import { PrimaryButton } from '@/components/Buttons';
+import { PrimaryButton, SecondaryButton } from '@/components/Buttons';
 
 export default function HomePage() {
   return (
@@ -36,10 +36,13 @@ export default function HomePage() {
             </Text>
           </Box>
           <Flex mt='10px' justifyContent="center">
-            <Stack direction={['column', 'row']} spacing={4}>
-              <PrimaryButton route="/client-register" text="Submit A Project Request" />
-              <PrimaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
-            </Stack>
+            <Container centerContent>
+              <PrimaryButton route="/contract" text="Create A Contract" />
+              <Stack direction={['column', 'row']} spacing={4} my={2}>
+                <SecondaryButton route="/client-register" text="Submit A Project Request" />
+                <SecondaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
+              </Stack>
+            </Container>
           </Flex>
         </Center>
         <Projects />

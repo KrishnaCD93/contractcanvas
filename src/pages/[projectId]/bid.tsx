@@ -15,7 +15,7 @@ import {
 import DeveloperRegistrationForm, { DeveloperInfoData, DeveloperZKP } from '../../components/Registration/BidRegistration';
 import DevData from '@/components/ViewZKP';
 import { useRouter } from 'next/router';
-import { ProjectItems } from '@/components/ProjectCard';
+import ProjectCard, { ProjectItems } from '@/components/ProjectCard';
 import { useUser } from '@supabase/auth-helpers-react';
 
 const BidPage = () => {
@@ -37,11 +37,12 @@ const BidPage = () => {
     exclusions: [],
   });
   const [devZKP, setDevZKP] = useState<DeveloperZKP>();
+  const [devEmbeddings, setDevEmbeddings] = useState<number[]>()
 
   const toast = useToast();
   const devRef = useRef<HTMLDivElement>(null);
 
-  const budget = useCallback(() => {
+  const getProject = useCallback(() => {
     fetch(`/api/supabase-fetch-id?database=projects&id=${projectId}`, {
       method: 'GET',
     })
@@ -54,8 +55,8 @@ const BidPage = () => {
   }, [projectId]);
 
   useEffect(() => {
-    budget();
-  }, [budget]);
+    getProject();
+  }, [getProject]);
 
   const runProofs = async () => {
     if (maxBudget.length === 0 || bidAmount.length === 0) return;
@@ -80,6 +81,10 @@ const BidPage = () => {
       devRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [signals]);
+
+  const removeBid = (id: string) => {
+    router.back();
+  }
 
   const submitBid = async () => {
     const userId = user?.id;
@@ -123,7 +128,22 @@ const BidPage = () => {
 
   return (
     <Box p={4}>
-      {maxBudget && (<><Heading as="h2" size="lg" textAlign="center" mb={6}>
+      <ProjectCard 
+        onDelete={removeBid}
+        user={user}
+        id={projectId as string}
+        name={project?.name || ''}
+        description={project?.description || ''}
+        scope={project?.scope || ''}
+        milestones={project?.milestones || []}
+        budget={project?.budget || 0}
+        terms_and_conditions={project?.terms_and_conditions || ''}
+        specific_requests={project?.specific_requests || ''}
+        protected_ip={project?.protected_ip || true}
+        user_id={project?.user_id || ''}
+        created_at={project?.created_at || new Date}
+      />
+      {maxBudget && (<><Heading as="h2" size="lg" textAlign="center" m={6}>
         Add Your Bid
       </Heading>
       <VStack spacing={4}>
