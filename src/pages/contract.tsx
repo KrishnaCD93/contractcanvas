@@ -10,7 +10,9 @@ import {
 const ContractPage = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState({
-    prediction: '',
+    prediction: {
+      content: '',
+    },
     error: '',
   })
   const [loading, setLoading] = useState(false);
@@ -21,16 +23,16 @@ const ContractPage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('submitting', input);
     setLoading(true);
     try {
-      await fetch(`http://127.0.0.1:8000/predict/${input}`)
-      .then((res) => res.json())
-      .then((data) => { console.log('data: ', data); setOutput(data); });
-    console.log('data: ', output);
-    setLoading(false);
+      const server = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://127.0.0.1:8000';
+      await fetch(`${server}/predict/${input}`)
+        .then((res) => res.json())
+        .then((data) => { console.log('data: ', data); setOutput(data) });
     } catch (err) {
-      console.log(err);
+      alert(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +49,7 @@ const ContractPage = () => {
         {
           output.prediction && (
             <Box>
-              <p>{output.prediction}</p>
+              <p>{output.prediction.content}</p>
               <p color='red'>{output.error}</p>
             </Box>
           )

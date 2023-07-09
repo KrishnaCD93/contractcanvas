@@ -101,7 +101,7 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
   const [loading, setLoading] = useState(false);
   const [devStep, setDevStep] = useState(0);
   const [formData, setFormData] = useState<DeveloperFormData>({
-    rate: '',
+    rate: rate,
     resume: null,
     availability: '',
     skills: '',
@@ -273,7 +273,6 @@ const DeveloperRegistrationForm: React.FC<DeveloperRegistrationProps> = ({
                 type="number"
                 name="rate"
                 placeholder='60.00'
-                defaultValue={rate}
                 value={formData.rate}
                 onChange={handleFormChange}
               />
