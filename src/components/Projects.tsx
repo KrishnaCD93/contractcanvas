@@ -7,6 +7,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 
 const Projects = () => {
   const [projects, setProjects] = useState<ProjectItems[]>([{
+    username: "",
     id: "", 
     name: "", 
     description: "", 

@@ -15,6 +15,7 @@ const ContractPage = () => {
     },
     error: '',
   })
+  const [messages, setMessages] = useState([{ humanMessage: '', aiMessage: '' }])
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,9 +27,15 @@ const ContractPage = () => {
     setLoading(true);
     try {
       const server = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://127.0.0.1:8000';
-      await fetch(`${server}/predict/${input}`)
+      const newInputs = [...messages, { humanMessage: input, aiMessage: '' }];
+      const inputs = JSON.stringify(newInputs);
+      await fetch(`${server}/predict/${inputs}`)
         .then((res) => res.json())
-        .then((data) => { console.log('data: ', data); setOutput(data) });
+        .then((data) => { 
+          console.log('data: ', data); 
+          setOutput(data);
+          setMessages([...messages, { humanMessage: input, aiMessage: data.prediction }])
+        });
     } catch (err) {
       alert(err);
     } finally {
