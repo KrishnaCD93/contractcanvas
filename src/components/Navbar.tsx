@@ -45,10 +45,10 @@ export const Navbar = () => {
     await supabaseClient.auth.signOut();
     router.push('/login');
   };
-  
+
   return (
     <Box
-      bg='brand.mint-green'
+      bg='brand.dark-orange'
       px={4}
       py={2}
       position="sticky"
@@ -61,7 +61,6 @@ export const Navbar = () => {
           size="md"
           cursor="pointer"
           onClick={() => router.push('/')}
-          color='brand.space-cadet'
         >
           ContractCanvas
         </Heading>
@@ -74,9 +73,9 @@ export const Navbar = () => {
         />
         <Drawer placement="right" onClose={onClose} isOpen={isOpen}>
           <DrawerOverlay>
-          <DrawerContent>
+            <DrawerContent>
               <DrawerCloseButton />
-              <DrawerHeader color="brand.delft-blue" borderBottomWidth="1px">
+              <DrawerHeader color="brand.deft-blue" borderBottomWidth="1px">
                 ContractCanvas
               </DrawerHeader>
               <DrawerBody>
@@ -114,7 +113,7 @@ export const Navbar = () => {
                     <>
                       <Link href="/login">Login</Link>
                       <Menu>
-                        <MenuButton 
+                        <MenuButton
                           as={Button}
                           rightIcon={<FiChevronDown />}
                           size="sm"
@@ -145,13 +144,13 @@ export const Navbar = () => {
           spacing={4}
           display={['none', 'flex']}
         >
-          <Link href="/" color='brand.space-cadet'>
+          <Link href="/" >
             Home
           </Link>
-          <Link href="/projects" color='brand.space-cadet'>
+          <Link href="/projects" >
             Projects
           </Link>
-          <Link href="/about" color='brand.space-cadet'>
+          <Link href="/about" >
             About
           </Link>
           {user ? (
@@ -162,7 +161,7 @@ export const Navbar = () => {
                   rightIcon={<FiChevronDown />}
                   size="sm"
                   variant="ghost"
-                  color={'brand.space-cadet'}
+                  color={'brand.deft-blue'}
                 >
                   {userName?.split(' ').map((name) => name[0]).join('')}
                 </MenuButton>
@@ -182,11 +181,11 @@ export const Navbar = () => {
             <>
               <Link href="/login">Login</Link>
               <Menu>
-                <MenuButton 
+                <MenuButton
                   as={Button}
                   rightIcon={<FiChevronDown />}
                   variant="ghost"
-                  color={'brand.space-cadet'}
+                  color={'brand.deft-blue'}
                 >
                   Register
                 </MenuButton>
@@ -210,69 +209,3 @@ export const Navbar = () => {
     </Box>
   );
 };
-
-//   return (
-//     <Box bg="teal.500" px={4} py={2}>
-//       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-//         <Heading
-//           as="h1"
-//           size="md"
-//           cursor="pointer"
-//           onClick={() => router.push('/')}
-//         >
-//           ContractCanvas
-//         </Heading>
-//         <HStack spacing={8} alignItems={'center'}>
-//           <HStack as="nav" spacing={4}>
-//             <Link href="/" color="white">
-//               Home
-//             </Link>
-//             <Link href="/projects" color="white">
-//               Projects
-//             </Link>
-//             <Link href="/about" color="white">
-//               About
-//             </Link>
-//             {user ? (
-//               <>
-//                 <Menu>
-//                   <MenuButton
-//                     as={Button}
-//                     rightIcon={<FiChevronDown />}
-//                     size="sm"
-//                     variant="ghost"
-//                   >
-//                     {avatarUrl ? <Avatar
-//                       size="sm"
-//                       src={avatarUrl}
-//                     /> : 
-//                   userName?.split(' ').map((name) => name[0]).join('')}
-//                   </MenuButton>
-//                   <MenuList>
-//                     <MenuItem onClick={() => router.push('/contract-registration')}>
-//                       New Contract
-//                     </MenuItem>
-//                     <MenuDivider />
-//                     <MenuItem onClick={() => router.push('/profile')}>
-//                       Profile
-//                     </MenuItem>
-//                     <MenuItem onClick={logout}>Logout</MenuItem>
-//                   </MenuList>
-//                 </Menu>
-//               </>
-//             ) : (
-//               <>
-//                 <Link href="/register" color="white">
-//                   Register
-//                 </Link>
-//                 <Link href="/login" color="white">
-//                   Login
-//                 </Link>
-//               </>
-//             )}
-//           </HStack>
-//         </HStack>
-//       </Flex>
-//     </Box>
-//   );
-// };
