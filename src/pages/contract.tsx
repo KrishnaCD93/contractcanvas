@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Heading,
@@ -6,9 +6,13 @@ import {
   Input,
   Button,
 } from '@chakra-ui/react';
+import { FiFile } from 'react-icons/fi';
 
 const ContractPage = () => {
   const [input, setInput] = useState('');
+  const [inputText, setInputText] = useState('');
+  const [inputPdf, setInputPdf] = useState<File | null>(null);
+  const hiddenFileInput = useRef<HTMLInputElement>(null);
   const [output, setOutput] = useState('');
   const [messages, setMessages] = useState([{ humanMessage: '', aiMessage: '' }])
   const [loading, setLoading] = useState(false);
@@ -28,6 +32,16 @@ const ContractPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
+  };
+
+  const handleFileInputClick = () => {
+    hiddenFileInput.current?.click(); 
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setInputPdf(event.target.files[0]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,8 +64,21 @@ const ContractPage = () => {
           Contract
         </Heading>
         <form onSubmit={handleSubmit}>
-          <Input type="text" value={input} onChange={handleChange} />
-          <Button isLoading={loading} type="submit">Get Response</Button>
+          {
+            !inputPdf ? (
+              <>
+                <Input type="text" value={input} onChange={handleChange} />
+                <Button isLoading={loading} type="submit">Get Response</Button>
+              </>
+            ) : null
+          }
+          <Input type={'file'} style={{ display: 'none' }} accept='application/pdf'
+            onChange={handleFileChange}
+            ref={hiddenFileInput} />
+          <Button onClick={handleFileInputClick}>
+            <FiFile />
+            Select PDF
+          </Button>
         </form>
         {
           output && (
