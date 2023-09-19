@@ -50,6 +50,11 @@ const ContractPage = () => {
     try {
       const newInputs = [...messages, { humanMessage: input, aiMessage: '' }];
       setMessages(newInputs);
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/predict/${input}`)
+        .then((res) => res.json())
+        .then((data) => { console.log('data: ', data); setOutput(data); });
+      console.log('data: ', output);
+      setLoading(false);
     } catch (err) {
       alert(err);
     } finally {

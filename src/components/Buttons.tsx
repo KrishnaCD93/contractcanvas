@@ -13,8 +13,9 @@ const PrimaryButton: React.FC<ButtonProps> = ({ ...props }) => {
   return (
     <Button
       size="lg"
-      bg="brand.mint-green"
-      color="brand.space-cadet"
+      bg="brand.dark-orange"
+      color="brand.celeste"
+      _hover={{ bg: "brand.space-cadet", color: "brand.mint-green" }}
       onClick={() => router.push(props.route)}
     >
       {props.text}
@@ -29,9 +30,9 @@ const SecondaryButton: React.FC<ButtonProps> = ({ ...props }) => {
     <Button
       size="lg"
       variant="outline"
-      borderColor="brand.light-cyan"
+      bg="brand.celeste"
       color="brand.space-cadet"
-      _hover={{ bg: "brand.light-cyan-2", color: "brand.space-cadet" }}
+      _hover={{ bg: "brand.misty-rose", color: "brand.space-cadet" }}
       onClick={() => Router.push(props.route)}
     >
       {props.text}

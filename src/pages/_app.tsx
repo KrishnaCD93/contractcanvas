@@ -22,6 +22,7 @@ const theme = extendTheme({
       "mint-green": "#D1F8F3",
       "celeste": "#B6E7E0",
       "misty-rose": "#FDE5DE",
+      "dark-orange": "#DA532C",
       "cool-gray": "#7D859B",
       "space-cadet": "#262E57",
       "delft-blue": "#373F62",
@@ -37,22 +38,22 @@ function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) 
     const handleRouteChange = (url: any) => {
       gtag.pageview(url);
     };
-    
+
     router.events.on("routeChangeComplete", handleRouteChange);
-    
+
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
     };
   }, [router.events]);
-  
+
   return (
     <>
       <Script strategy="afterInteractive" src="https://www.googletagmanager.com/gtag/js?id=G-TKK9MLSFV1"></Script>
-        <Script
-          id='google-analytics'
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+      <Script
+        id='google-analytics'
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
@@ -64,7 +65,7 @@ function MyApp({ Component, pageProps }: AppProps<{ initialSession: Session }>) 
       />
       <ChakraProvider theme={theme}>
         <SessionContextProvider supabaseClient={supabaseClient} initialSession={pageProps.initialSession}>
-          <Box bg="brand.white" minH="100vh" pb={8}>
+          <Box bg="brand.light-cyan" minH="100vh" pb={8}>
             <Navbar />
             <Component {...pageProps} />
           </Box>

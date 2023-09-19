@@ -4,27 +4,30 @@ import {
   Center,
   Container,
   Flex,
+  Heading,
   Stack,
   Text,
 } from '@chakra-ui/react';
 import Projects from '@/components/Projects';
 import Logo from '@/components/Logo';
 import { PrimaryButton, SecondaryButton } from '@/components/Buttons';
+import Image from 'next/image';
+import vectorIllustration from '../assets/vector-illustration.svg';
 
 export default function HomePage() {
   return (
     <Container maxW="container.xl">
-      <Box as="section" pt={20} pb={32}>
-        <Center h="80vh" flexDirection="column">
+      <Box as="section" pt={20} mt='20'>
+        <Center flexDirection="column">
           <Logo h={400} w={300} />
           <Box as="header" textAlign="center" my={6}>
-            <Text 
-              fontSize="4xl" 
-              fontWeight="extrabold" 
+            <Text
+              fontSize="4xl"
+              fontWeight="extrabold"
               color="brand.cool-gray"
             >
-              Forge creative{" "}
-              <Text as="span" color="brand.misty-rose">contracts</Text>
+              FORGE CREATIVE{" "}
+              <Text as="span" color="brand.dark-orange">CONTRACTS</Text>
             </Text>
             <Text
               fontSize="2xl"
@@ -34,18 +37,21 @@ export default function HomePage() {
             >
               Freelance with trust while protecting privacy
             </Text>
+            <Heading as="h1" color="brand.space-cadet" textAlign="center" mt='5' fontWeight='extrabold' fontSize={'xxx-large'}>CONTRACT CANVAS</Heading>
           </Box>
-          <Flex mt='10px' justifyContent="center">
+          <Flex mt='5' mb='10' justifyContent="center">
             <Container centerContent>
-              <PrimaryButton route="/contract" text="Create A Contract" />
+              <PrimaryButton route="/contract" text="Build A Contract" />
               <Stack direction={['column', 'row']} spacing={4} my={2}>
                 <SecondaryButton route="/client-register" text="Submit A Project Request" />
                 <SecondaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
               </Stack>
             </Container>
           </Flex>
+          <Box boxShadow='lg'>
+            <Image src={vectorIllustration} alt="vector illustration" />
+          </Box>
         </Center>
-        <Projects />
       </Box>
     </Container>
   );
