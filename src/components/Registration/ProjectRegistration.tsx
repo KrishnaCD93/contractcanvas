@@ -42,7 +42,7 @@ export interface ProjectItemsToUpload {
   protected_ip: boolean;
   scope: string;
   milestones: Milestone[];
-  budget: string;
+  budget: number;
   terms_and_conditions: string;
   specific_requests: string;
 }
@@ -63,7 +63,7 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
     protectedIP: false,
     scope: '',
     milestones: [{ milestone: '', targetDate: '' }],
-    budget: '',
+    budget: 0,
     termsAndConditions: '',
     specificRequests: ''
   };
@@ -104,7 +104,7 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
     e.preventDefault();
     console.log('Form state', formState);
 
-    if (!formState.scope || !formState.milestones || !formState.budget || !formState.name || !formState.description) {
+    if (!formState.scope || !formState.milestones || !formState.budget || isNaN(formState.budget) || !formState.name || !formState.description) {
       toast({
         title: 'Client registration failed.',
         description: 'Please fill out all required fields.',
@@ -114,7 +114,6 @@ const ProjectRegistrationForm: React.FC<ProjectRegistrationFormProps> = ({
       });
       return;
     }
-
 
     const projectData: ProjectItemsToUpload = {
       name: formState.name,

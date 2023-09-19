@@ -84,6 +84,7 @@ const RegisterClient: React.FC = () => {
         const projectItemsToUploadWithUserId = {
           ...projectItemsToUpload,
           user_id: user.id,
+          username: userData.firstName + ' ' + userData.lastName,
         }
         const projectIds = await uploadProjectItems('projects', [projectItemsToUploadWithUserId]);
         if (projectIds && projectIds.length > 0) {

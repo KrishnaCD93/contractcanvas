@@ -2,8 +2,10 @@ import { Box, Button, Icon, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import Logo from "./Logo";
 import { DeleteIcon } from "@chakra-ui/icons";
+import React from "react";
 
 export interface ProjectItems {
+  username: string;
   id: string;
   name: string;
   description: string;
@@ -51,9 +53,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <Text fontWeight={'bold'}>{name}</Text>
         <Text>{description}</Text>
         <Text><b>Scope:</b> {scope}</Text>
-        <Text><b>Milestones:</b> {milestones.map((milestone) => 
-          milestone.milestone + `: ` + new Date(milestone.targetDate).toLocaleDateString() + `\n`
-        )}</Text>
+        <Text>
+          <b>Milestones:</b> <br />
+          {milestones.map((milestone, index) => 
+            <React.Fragment key={index}>
+              <i>{milestone.milestone}</i>
+              {`: ${new Date(milestone.targetDate).toLocaleDateString()}`}
+              {index !== milestones.length - 1 && <br />}
+            </React.Fragment>
+          )}
+        </Text>
         {protected_ip ? <Text color="brand.cool-gray">Protected Information. Submit a bid to view.</Text> :
         (<>
         <Text><b>Budget Range:</b> ${budget}</Text>
