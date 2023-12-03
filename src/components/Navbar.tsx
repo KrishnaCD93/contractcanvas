@@ -55,7 +55,7 @@ export const Navbar = () => {
       top="0"
       zIndex="sticky"
     >
-      <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
+      <Flex h='4rem' alignItems={'center'} justifyContent={'space-between'}>
         <Heading
           as="h1"
           size="md"

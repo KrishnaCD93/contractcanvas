@@ -1,100 +1,108 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Heading,
-  Container,
-  Input,
-  Button,
-} from '@chakra-ui/react';
-import { FiFile } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { Box, Button, Divider, HStack, Text, Textarea, VStack } from '@chakra-ui/react';
+import React from 'react';
 
-const ContractPage = () => {
-  const [input, setInput] = useState('');
+const ChatPage = () => {
   const [inputText, setInputText] = useState('');
-  const [inputPdf, setInputPdf] = useState<File | null>(null);
-  const hiddenFileInput = useRef<HTMLInputElement>(null);
-  const [output, setOutput] = useState('');
-  const [messages, setMessages] = useState([{ humanMessage: '', aiMessage: '' }])
-  const [loading, setLoading] = useState(false);
-  
+  const [response, setResponse] = useState<string>('');
+  const [streamIndex, setStreamIndex] = useState(0);
+  const [messages, setMessages] = useState<{ human_message: string | null, ai_message: string | null }[]>([]);
+  const [streaming, setStreaming] = useState(false);
+  const ctrl = new AbortController();
+
+  const handleSendClick = async () => {
+    const currentInput = inputText;
+    setInputText('');
+
+    setMessages(prev => [...prev, { human_message: currentInput, ai_message: '' }]);
+    setStreaming(true);
+
+    fetchEventSource('http://localhost:8000/chat', {
+      method: 'POST',
+      headers: {
+        Accept: "text/event-stream",
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([...messages, { human_message: currentInput, ai_message: '' }]),
+      signal: ctrl.signal,
+      onmessage(ev) {
+        const rawData = ev.data;
+        const data = rawData.replace(/^data: /, '');
+        if (!data) return;
+        setResponse(prev => prev + data);
+      }
+    });
+    setStreaming(false);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendClick();
+    }
+  };
+
   useEffect(() => {
-    const server = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://127.0.0.1:8000';
-    const inputs = JSON.stringify(messages);
-    const eventSource = new EventSource(`${server}/predict/${inputs}`);
-    eventSource.onmessage = (event) => {
-      setOutput(event.data);
-      setMessages([...messages, { humanMessage: input, aiMessage: event.data }])
-    };
-    return () => {
-      eventSource.close();
-    };
-  }, [input, messages]);
+    return () => ctrl.abort();
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
+  useEffect(() => {
+    if (response && streamIndex < response.length) {
+      const timer = setTimeout(() => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          if (lastIndex >= 0) {
+            newMessages[lastIndex].ai_message += response.charAt(streamIndex);
+          }
+          return newMessages;
+        });
+        setStreamIndex(streamIndex + 1);
+      }, 50);
 
-  const handleFileInputClick = () => {
-    hiddenFileInput.current?.click(); 
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setInputPdf(event.target.files[0]);
+      return () => clearTimeout(timer);
+    } else if (streamIndex >= response.length) {
+      setResponse('');
+      setStreamIndex(0);
     }
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const newInputs = [...messages, { humanMessage: input, aiMessage: '' }];
-      setMessages(newInputs);
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/predict/${input}`)
-        .then((res) => res.json())
-        .then((data) => { console.log('data: ', data); setOutput(data); });
-      console.log('data: ', output);
-      setLoading(false);
-    } catch (err) {
-      alert(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [response, streamIndex]);
 
   return (
-    <Container maxW="container.xl">
-      <Box as="section" pt={20} pb={32} textAlign='center'>
-        <Heading as="h1" color="brand.delft-blue" textAlign="center" mb={6}>
-          Contract
-        </Heading>
-        <form onSubmit={handleSubmit}>
-          {
-            !inputPdf ? (
-              <>
-                <Input type="text" value={input} onChange={handleChange} />
-                <Button isLoading={loading} type="submit">Get Response</Button>
-              </>
-            ) : null
-          }
-          <Input type={'file'} style={{ display: 'none' }} accept='application/pdf'
-            onChange={handleFileChange}
-            ref={hiddenFileInput} />
-          <Button onClick={handleFileInputClick}>
-            <FiFile />
-            Select PDF
-          </Button>
-        </form>
-        {
-          output && (
-            <Box>
-              <p>{output}</p>
-            </Box>
-          )
-        }
+    <VStack spacing={4}>
+      <Box p={4} h={'calc(100vh - 12rem)'} overflowY="scroll" w='100%'>
+        {messages.map((message, index) => (
+          <Box key={index}>
+            <Text fontWeight='bold'>You <br /></Text>
+            <Text bg={'transparent'}>{message.human_message}</Text>
+            <Divider orientation='horizontal' />
+            <Text fontWeight='bold'>ProjectGPT <br /></Text>
+            <Text bg={'transparent'}>{message.ai_message}</Text>
+            <Divider orientation='horizontal' />
+          </Box>
+        ))}
       </Box>
-    </Container>
-  );
+      <HStack
+        border={5}
+        overflow="hidden"
+        w='100%'
+        h='5rem'
+        position="sticky"
+        top="0"
+        zIndex="sticky">
+        <Textarea
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type your message"
+          resize="none"
+          w='100%'
+        />
+        <Button onClick={handleSendClick} isDisabled={streaming}>⬆️</Button>
+        <Button onClick={() => ctrl.abort()} isDisabled={!streaming}>⛔</Button>
+      </HStack>
+    </VStack>
+  )
 };
 
-export default ContractPage;
+export default ChatPage;
