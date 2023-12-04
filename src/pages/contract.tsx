@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { Box, Button, Divider, HStack, Text, Textarea, VStack } from '@chakra-ui/react';
+import { Box, Button, Divider, HStack, Spinner, Text, Textarea, VStack } from '@chakra-ui/react';
 import React from 'react';
 
 const ChatPage = () => {
   const [inputText, setInputText] = useState('');
-  const [response, setResponse] = useState<string>('');
-  const [streamIndex, setStreamIndex] = useState(0);
   const [messages, setMessages] = useState<{ human_message: string | null, ai_message: string | null }[]>([]);
+  const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const ctrl = new AbortController();
 
   const handleSendClick = async () => {
+    setLoading(true);
+    setStreaming(true);
+
     const currentInput = inputText;
     setInputText('');
 
     setMessages(prev => [...prev, { human_message: currentInput, ai_message: '' }]);
-    setStreaming(true);
 
-    fetchEventSource('http://localhost:8000/chat', {
+    fetchEventSource(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`, {
       method: 'POST',
       headers: {
         Accept: "text/event-stream",
@@ -30,7 +31,7 @@ const ChatPage = () => {
         const rawData = ev.data;
         const data = rawData.replace(/^data: /, '');
         if (!data) return;
-        setResponse(prev => prev + data);
+        streamResponse(data);
       }
     });
     setStreaming(false);
@@ -43,30 +44,28 @@ const ChatPage = () => {
     }
   };
 
+  const streamResponse = (data: string) => {
+    setLoading(false);
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < data.length) {
+        const char = data.charAt(index);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1].ai_message += char;
+          return newMessages;
+        });
+
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 50);
+  };
+
   useEffect(() => {
     return () => ctrl.abort();
   }, []);
-
-  useEffect(() => {
-    if (response && streamIndex < response.length) {
-      const timer = setTimeout(() => {
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastIndex = newMessages.length - 1;
-          if (lastIndex >= 0) {
-            newMessages[lastIndex].ai_message += response.charAt(streamIndex);
-          }
-          return newMessages;
-        });
-        setStreamIndex(streamIndex + 1);
-      }, 50);
-
-      return () => clearTimeout(timer);
-    } else if (streamIndex >= response.length) {
-      setResponse('');
-      setStreamIndex(0);
-    }
-  }, [response, streamIndex]);
 
   return (
     <VStack spacing={4}>
@@ -77,6 +76,7 @@ const ChatPage = () => {
             <Text bg={'transparent'}>{message.human_message}</Text>
             <Divider orientation='horizontal' />
             <Text fontWeight='bold'>ProjectGPT <br /></Text>
+            {loading && <Spinner size='xs' />}
             <Text bg={'transparent'}>{message.ai_message}</Text>
             <Divider orientation='horizontal' />
           </Box>

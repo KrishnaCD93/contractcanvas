@@ -8,7 +8,6 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import Projects from '@/components/Projects';
 import Logo from '@/components/Logo';
 import { PrimaryButton, SecondaryButton } from '@/components/Buttons';
 import Image from 'next/image';
