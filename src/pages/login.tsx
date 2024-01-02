@@ -11,7 +11,7 @@ const LoginPage = () => {
       </Box>
       <Text mt={4} textAlign="center">
         {`Don't`} have an account?{' '}
-        <Link href="/register"><Text as="u" color="blue.500">Register</Text></Link>
+        <Link href="/freelancer-register"><Text as="u" color="blue.500">Register</Text></Link>
       </Text>
     </Container>
   );

@@ -34,7 +34,7 @@ export default function HomePage() {
               color="brand.space-cadet"
               mt={2}
             >
-              Freelance with trust while protecting privacy
+              Freelance with built-in data analytics for your projects
             </Text>
             <Heading as="h1" color="brand.space-cadet" textAlign="center" mt='5' fontWeight='extrabold' fontSize={'xxx-large'}>CONTRACT CANVAS</Heading>
           </Box>
@@ -42,8 +42,15 @@ export default function HomePage() {
             <Container centerContent>
               <PrimaryButton route="/contract" text="Build A Contract" />
               <Stack direction={['column', 'row']} spacing={4} my={2}>
-                <SecondaryButton route="/client-register" text="Submit A Project Request" />
-                <SecondaryButton route="/freelancer-register" text="Sign Up As Freelancer" />
+                <SecondaryButton route="/client-register" text="Submit A Project" />
+                {/* verticle line with text */}
+                <Box
+                  borderLeft="2px solid"
+                  borderColor="brand.cool-gray"
+                  height="2rem"
+                  my={2}
+                />
+                <SecondaryButton route="/freelancer-register" text="Find A Project" />
               </Stack>
             </Container>
           </Flex>
